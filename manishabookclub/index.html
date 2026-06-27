@@ -1,1 +1,395 @@
-hi folks
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book Club Picks</title>
+  <style>
+    :root {
+      --bg: #f7f0e4;
+      --ink: #201b16;
+      --muted: #6f6258;
+      --card: #fffaf1;
+      --line: rgba(32, 27, 22, 0.14);
+      --shadow: 0 24px 80px rgba(58, 42, 28, 0.16);
+      --covenant: #8a4b36;
+      --flights: #476c78;
+      --parable: #7a5a22;
+      --blindsight: #47424f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(138, 75, 54, 0.14), transparent 36rem),
+        radial-gradient(circle at top right, rgba(71, 108, 120, 0.13), transparent 36rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+      gap: 32px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.7rem, 7vw, 5.8rem);
+      line-height: 0.93;
+      margin: 0;
+      max-width: 880px;
+      letter-spacing: -0.055em;
+    }
+
+    .intro {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin: 0;
+      max-width: 32rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .book-card {
+      position: relative;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--card) 92%, white);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      isolation: isolate;
+    }
+
+    .book-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 7px;
+      background: var(--accent);
+      z-index: 2;
+    }
+
+    .cover-wrap {
+      aspect-ratio: 3 / 4;
+      background: linear-gradient(135deg, rgba(0,0,0,0.05), rgba(255,255,255,0.45));
+      display: grid;
+      place-items: center;
+      padding: 22px 22px 12px;
+    }
+
+    .cover {
+      width: min(78%, 220px);
+      height: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 18px 38px rgba(0,0,0,0.24);
+      transform: rotate(-1deg);
+      background: #ddd;
+    }
+
+    .content {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex: 1;
+    }
+
+    .title-row h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.48rem;
+      line-height: 1.05;
+      margin: 0 0 6px;
+      letter-spacing: -0.025em;
+    }
+
+    .author {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .tags {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      border: 1px solid color-mix(in srgb, var(--accent) 44%, transparent);
+      color: color-mix(in srgb, var(--accent) 70%, black);
+      background: color-mix(in srgb, var(--accent) 9%, white);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .sell {
+      font-size: 1rem;
+      line-height: 1.48;
+      margin: 0;
+      font-weight: 650;
+    }
+
+    .meta {
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      margin-top: auto;
+    }
+
+    .meta b {
+      color: var(--ink);
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: color-mix(in srgb, var(--accent) 72%, black);
+      font-weight: 850;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; font-size: 1.25rem; }
+    details[open] summary::after { content: "–"; }
+
+    .expanded {
+      padding-top: 13px;
+      display: grid;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.48;
+    }
+
+    .review-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .review-links a {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.48);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .review-links a:hover {
+      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+      color: color-mix(in srgb, var(--accent) 72%, black);
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      header { grid-template-columns: 1fr; }
+      .intro { max-width: 45rem; }
+    }
+
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 22px, 1160px); padding-top: 34px; }
+      .grid { grid-template-columns: 1fr; }
+      .book-card { border-radius: 22px; }
+      .cover-wrap { aspect-ratio: 16 / 11; }
+      .cover { width: min(46%, 170px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <div class="eyebrow"></div>
+        <h1></h1>
+      </div>
+      <p class="intro"></p>
+    </header>
+
+    <section class="grid" aria-label="Book options"></section>
+
+    <p class="footer-note"></p>
+  </main>
+
+  <script>
+    // All content lives in books.md. Edit that file to change the page; no need to touch this HTML.
+
+    // Escape text so book content can never inject markup.
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    // Parse books.md into { page: {...}, books: [...] }.
+    function parseBooks(text) {
+      var page = {};
+      var books = [];
+      var current = null;
+      var lines = text.split(/\r?\n/);
+
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var trimmed = line.trim();
+        if (!trimmed || trimmed.charAt(0) === '#' && trimmed.indexOf('## ') !== 0) {
+          // Blank line or a "# " comment heading: skip.
+          continue;
+        }
+
+        if (trimmed.indexOf('## ') === 0) {
+          // New book card.
+          current = { title: trimmed.slice(3).trim(), tags: [], links: [] };
+          books.push(current);
+          continue;
+        }
+
+        // Field line: either "- key: value" (book) or "key: value" (page setting).
+        var body = trimmed.charAt(0) === '-' ? trimmed.slice(1).trim() : trimmed;
+        var idx = body.indexOf(':');
+        if (idx === -1) { continue; }
+        var key = body.slice(0, idx).trim().toLowerCase();
+        var value = body.slice(idx + 1).trim();
+
+        if (!current) {
+          // Page-level setting (before the first "## ").
+          page[key] = value;
+          continue;
+        }
+
+        if (key === 'tags') {
+          current.tags = value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+        } else if (key === 'link') {
+          var parts = value.split('|');
+          current.links.push({ label: parts[0].trim(), url: (parts[1] || '').trim() });
+        } else {
+          current[key] = value;
+        }
+      }
+
+      return { page: page, books: books };
+    }
+
+    function renderCard(book) {
+      var tags = book.tags.map(function (t) {
+        return '<span class="tag">' + esc(t) + '</span>';
+      }).join('');
+
+      var links = book.links.map(function (l) {
+        return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+      }).join('');
+
+      var meta = '';
+      if (book.angle) {
+        meta += '<div><b>Best discussion angle:</b> ' + esc(book.angle) + '</div>';
+      }
+      if (book.caveat) {
+        meta += '<div><b>Caveat:</b> ' + esc(book.caveat) + '</div>';
+      }
+
+      var details = '';
+      if (book.why || links) {
+        details =
+          '<details><summary>Why nominate it?</summary><div class="expanded">' +
+          (book.why ? '<div>' + esc(book.why) + '</div>' : '') +
+          (links ? '<div class="review-links">' + links + '</div>' : '') +
+          '</div></details>';
+      }
+
+      return (
+        '<article class="book-card" style="--accent: ' + esc(book.accent || '#6f6258') + '">' +
+          '<div class="cover-wrap">' +
+            '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />' +
+          '</div>' +
+          '<div class="content">' +
+            '<div class="title-row">' +
+              '<h2>' + esc(book.title) + '</h2>' +
+              '<div class="author">' + esc(book.author || '') + '</div>' +
+            '</div>' +
+            (tags ? '<div class="tags">' + tags + '</div>' : '') +
+            (book.sell ? '<p class="sell">' + esc(book.sell) + '</p>' : '') +
+            (meta ? '<div class="meta">' + meta + '</div>' : '') +
+            details +
+          '</div>' +
+        '</article>'
+      );
+    }
+
+    function render(data) {
+      var page = data.page;
+      if (page.eyebrow) { document.querySelector('.eyebrow').textContent = page.eyebrow; }
+      if (page.title) { document.querySelector('h1').textContent = page.title; }
+      if (page.intro) { document.querySelector('.intro').textContent = page.intro; }
+      if (page.footer) { document.querySelector('.footer-note').textContent = page.footer; }
+      if (page.title) { document.title = page.title; }
+
+      document.querySelector('.grid').innerHTML = data.books.map(renderCard).join('');
+    }
+
+    fetch('books.md', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('Could not load books.md (' + r.status + ')'); }
+        return r.text();
+      })
+      .then(function (text) { render(parseBooks(text)); })
+      .catch(function (err) {
+        document.querySelector('.grid').innerHTML =
+          '<p class="sell">' + esc(err.message) + '</p>';
+      });
+  </script>
+</body>
+</html>
