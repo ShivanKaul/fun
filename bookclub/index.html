@@ -164,6 +164,18 @@
       font-size: 0.95rem;
     }
 
+    .author a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      text-underline-offset: 2px;
+    }
+
+    .author a:hover {
+      color: color-mix(in srgb, var(--accent) 72%, black);
+      text-decoration-color: var(--accent);
+    }
+
     .tags {
       display: flex;
       gap: 7px;
@@ -323,6 +335,21 @@
       });
     }
 
+    // Escape text but turn inline [label](url) markdown links into anchors.
+    function linkify(s) {
+      var re = /\[([^\]]+)\]\((https?:\/\/[^\s]+?)\)(?=$|[\s,.;:])/g;
+      var out = '';
+      var last = 0;
+      var m;
+      while ((m = re.exec(s)) !== null) {
+        out += esc(s.slice(last, m.index));
+        out += '<a href="' + esc(m[2]) + '" target="_blank" rel="noopener">' + esc(m[1]) + '</a>';
+        last = m.index + m[0].length;
+      }
+      out += esc(s.slice(last));
+      return out;
+    }
+
     // Parse books.md into { page: {...}, books: [...] }.
     function parseBooks(text) {
       var page = {};
@@ -428,7 +455,7 @@
           '<div class="content">' +
             '<div class="title-row">' +
               '<h2>' + esc(book.title) + '</h2>' +
-              '<div class="author">' + esc(book.author || '') + '</div>' +
+              '<div class="author">' + linkify(book.author || '') + '</div>' +
             '</div>' +
             (tags ? '<div class="tags">' + tags + '</div>' : '') +
             (book.sell ? '<p class="sell">' + esc(book.sell) + '</p>' : '') +
