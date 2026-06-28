@@ -53,7 +53,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #47424f
 - cover: https://mpd-biblio-covers.imgix.net/9781250237484.jpg?v=2&w=900&dpr=2
 - wikipedia: https://en.wikipedia.org/wiki/Blindsight_(Watts_novel)
-- tags: hard sci-fi, consciousness, horror, aliens, creepy, free will
+- tags: hard sci-fi, consciousness, horror, aliens, creepy, intelligence
 - why pick: I read this a few years ago. It was dense and hard to get through but very interesting in its discussion about the relationship between intelligence and consciousness and is uncannily relevant for our modern angst about whether LLMs are conscious. 
 - quote:
 - why not pick: Dense, dark, and the characters can be hard to like. But the ideas are super cool!
