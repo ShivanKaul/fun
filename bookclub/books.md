@@ -29,7 +29,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - cover: https://pictures.abebooks.com/inventory/32321594257.jpg
 - tags: literary, fragmentary, travel, philosophical
 - why pick: This was my first Olga T book and I had devoured it. There's not much of a plot, but the individual stories were all interesting.
-- themes: travel, the body, impermanence, modern rootlessness, mortality
+- themes: eccentric, dreamlike, travel, impermanence, rootlessness
 - why not pick: There's not much of a plot. 
 - library: https://sfpl.bibliocommons.com/v2/search?query=flights&searchType=title
 - link: NYT review | https://www.nytimes.com/2018/08/14/books/review-flights-olga-tokarczuk.html
