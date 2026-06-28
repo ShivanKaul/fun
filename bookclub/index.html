@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Book Club Picks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #f7f0e4;
@@ -27,7 +30,9 @@
         radial-gradient(circle at top right, rgba(71, 108, 120, 0.13), transparent 36rem),
         var(--bg);
       color: var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     a { color: inherit; }
@@ -56,12 +61,14 @@
     }
 
     h1 {
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: "Fraunces", Georgia, "Times New Roman", serif;
+      font-optical-sizing: auto;
+      font-weight: 600;
       font-size: clamp(2.7rem, 7vw, 5.8rem);
-      line-height: 0.93;
+      line-height: 0.95;
       margin: 0;
       max-width: 880px;
-      letter-spacing: -0.055em;
+      letter-spacing: -0.03em;
     }
 
     .intro {
@@ -109,6 +116,20 @@
       padding: 22px 22px 12px;
     }
 
+    .cover-link {
+      display: contents;
+    }
+
+    .cover-link .cover {
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cover-link:hover .cover {
+      transform: rotate(-1deg) scale(1.03);
+      box-shadow: 0 22px 46px rgba(0,0,0,0.3);
+    }
+
     .cover {
       width: min(78%, 220px);
       height: 100%;
@@ -129,11 +150,13 @@
     }
 
     .title-row h2 {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 1.48rem;
-      line-height: 1.05;
+      font-family: "Fraunces", Georgia, "Times New Roman", serif;
+      font-optical-sizing: auto;
+      font-weight: 600;
+      font-size: 1.5rem;
+      line-height: 1.08;
       margin: 0 0 6px;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.015em;
     }
 
     .author {
@@ -198,13 +221,44 @@
       color: var(--muted);
     }
 
+    .card-foot {
+      margin-top: auto;
+      display: grid;
+      gap: 14px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .library {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.86rem;
+      padding: 11px 14px;
+      border-radius: 12px;
+      transition: filter 0.15s ease;
+    }
+
+    .library:hover { filter: brightness(1.08); }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 9px;
+    }
+
     .review-links {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-top: auto;
-      padding-top: 14px;
-      border-top: 1px solid var(--line);
     }
 
     .review-links a {
@@ -332,8 +386,8 @@
       }).join('');
 
       var meta = '';
-      if (book.angle) {
-        meta += '<div><b>Best discussion angle:</b> ' + esc(book.angle) + '</div>';
+      if (book.themes) {
+        meta += '<div><b>Themes:</b> ' + esc(book.themes) + '</div>';
       }
       if (book['why pick']) {
         meta += '<div><b>Why pick:</b> ' + esc(book['why pick']) + '</div>';
@@ -350,11 +404,27 @@
           '</blockquote>';
       }
 
+      // Footer: the SF Public Library link sits above its own labelled Reviews section.
+      var library = book.library
+        ? '<a class="library" href="' + esc(book.library) + '" target="_blank" rel="noopener">Find it at SF Public Library</a>'
+        : '';
+      var reviews = links
+        ? '<div><div class="section-label">Reviews</div><div class="review-links">' + links + '</div></div>'
+        : '';
+      var foot = (library || reviews)
+        ? '<div class="card-foot">' + library + reviews + '</div>'
+        : '';
+
+      var cover =
+        '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />';
+      // Make the cover link to the SF Public Library page when one is set.
+      if (book.library) {
+        cover = '<a class="cover-link" href="' + esc(book.library) + '" target="_blank" rel="noopener">' + cover + '</a>';
+      }
+
       return (
         '<article class="book-card" style="--accent: ' + esc(book.accent || '#6f6258') + '">' +
-          '<div class="cover-wrap">' +
-            '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />' +
-          '</div>' +
+          '<div class="cover-wrap">' + cover + '</div>' +
           '<div class="content">' +
             '<div class="title-row">' +
               '<h2>' + esc(book.title) + '</h2>' +
@@ -364,7 +434,7 @@
             (book.sell ? '<p class="sell">' + esc(book.sell) + '</p>' : '') +
             quote +
             (meta ? '<div class="meta">' + meta + '</div>' : '') +
-            (links ? '<div class="review-links">' + links + '</div>' : '') +
+            foot +
           '</div>' +
         '</article>'
       );
