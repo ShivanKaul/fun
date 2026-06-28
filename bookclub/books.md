@@ -20,8 +20,8 @@ intro: I wanted to pick a mix of books I've been meaning to read and books I've 
 - themes: family, inheritance, faith, medicine, caste, grief
 - why pick: It gives the group an expansive, character-rich novel with a lot to talk about: caste, Christianity in Kerala, illness, medical ethics, marriage, and the architecture of family secrets.
 - why not pick: It is long and probably emotionally dense.
-- library: https://sfpl.bibliocommons.com/v2/search?query=The%20Covenant%20of%20Water%20Abraham%20Verghese&searchType=smart
-- link: NYT review | https://www.nytimes.com/2023/05/02/books/review/abraham-verghese-covenant-of-water.html
+- library: https://sfpl.bibliocommons.com/v2/search?query=the%20covenant%20of%20water&searchType=title
+- link: NYT review | https://www.nytimes.com/2023/05/02/books/review/covenant-of-water-abraham-verghese.html
 - link: Washington Post | https://www.washingtonpost.com/books/2023/05/03/oprah-pick-abraham-verghese-review/
 
 ## Flights
@@ -34,9 +34,9 @@ intro: I wanted to pick a mix of books I've been meaning to read and books I've 
 - themes: travel, the body, impermanence, modern rootlessness, mortality
 - why pick: It is the most formally interesting choice: short sections, recurring obsessions, and a structure that invites argument about what makes a novel cohere.
 - why not pick: It is not plot-driven; the pleasure is associative.
-- library: https://sfpl.bibliocommons.com/v2/search?query=Flights%20Olga%20Tokarczuk&searchType=smart
-- link: NYT review | https://www.nytimes.com/2018/08/14/books/review/olga-tokarczuk-flights.html
-- link: Guardian | https://www.theguardian.com/books/2017/jun/03/flights-by-olga-tokarczuk-review
+- library: https://sfpl.bibliocommons.com/v2/search?query=flights&searchType=title
+- link: NYT review | https://www.nytimes.com/2018/08/14/books/review-flights-olga-tokarczuk.html
+- link: New Yorker | https://www.newyorker.com/magazine/2018/10/01/flights-a-novel-that-never-settles-down
 
 ## Parable of the Sower
 - author: Octavia E. Butler
@@ -48,8 +48,8 @@ intro: I wanted to pick a mix of books I've been meaning to read and books I've 
 - themes: societal collapse, survival, religion, climate change, inequality
 - why pick: This is the most urgent pick: accessible, gripping, and almost uncomfortably contemporary in its treatment of climate instability, privatization, inequality, and migration.
 - why not pick: It is bleak and violent, though not gratuitous.
-- library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20Octavia%20Butler&searchType=smart
-- link: Classic NYT review | https://lithub.com/read-a-classic-review-of-octavia-butlers-parable-of-the-sower/
+- library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
+- link: Classic NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
 - link: WIRED | https://www.wired.com/1995/10/when-the-lights-go-out/
 
 ## Blindsight
@@ -62,6 +62,5 @@ intro: I wanted to pick a mix of books I've been meaning to read and books I've 
 - themes: consciousness, intelligence, first contact, identity, free will
 - why pick: It would produce the most argument. The book is cerebral, creepy, and idea-forward, with a genuinely alien encounter rather than a dressed-up human one.
 - why not pick: The most difficult and polarizing pick.
-- library: https://sfpl.bibliocommons.com/v2/search?query=Blindsight%20Peter%20Watts&searchType=smart
+- library: https://sfpl.bibliocommons.com/v2/search?query=blindsight&searchType=title
 - link: WIRED | https://www.wired.com/2023/10/geeks-guide-peter-watts/
-- link: Grimdark Magazine | https://www.grimdarkmagazine.com/review-blindsight-by-peter-watt/
