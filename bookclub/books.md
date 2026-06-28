@@ -39,12 +39,12 @@ intro: This is a selection of books that have been on my list for a long time + 
 - author: [Octavia E. Butler](https://en.wikipedia.org/wiki/Octavia_E._Butler)
 - accent: #7a5a22
 - cover: https://www.hachettebookgroup.com/wp-content/uploads/2024/08/9781538732182.jpg
-- tags: dystopian, climate fiction, political, classic SF
+- tags: dystopian, climate fiction, political, sci-fi
 - why pick: This has been on my list forever. I don't know much about it except there is a dystopian society and that I've loved everything by Octavia Butler.
 - themes: societal collapse, survival, religion, climate change, inequality
 - why not pick: It sounds bleak and violent.
 - library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
-- link: Classic NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
+- link: NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
 - link: WIRED | https://www.wired.com/1995/10/when-the-lights-go-out/
 
 ## Blindsight
