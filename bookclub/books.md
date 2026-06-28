@@ -16,7 +16,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - cover: https://groveatlantic.com/core/wp-content/uploads/2022/10/Covenant-of-Water_HC_OBC_coverOnlyFINAL-scaled.jpg
 - wikipedia: https://en.wikipedia.org/wiki/The_Covenant_of_Water
 - tags: literary, family saga, India, historical
-- themes: family, inheritance, faith, medicine, caste, grief
+- themes: family, inheritance, faith, caste, grief
 - why pick: My mom loved it (she also loved The Correspondent)! It's expansive, character-rich and has lots of family drama and secrets.
 - quote:
 - why not pick: It is long and seems emotionally dense and grief-y.
