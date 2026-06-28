@@ -2,7 +2,7 @@
 #
 # Per-book fields you can edit:
 #   author (supports [name](url) links), accent (hex color), cover (image URL), wikipedia (book URL), tags (comma-separated),
-#   sell, quote (format: text | Source), themes (comma-separated),
+#   sell, quote (format: text | Source),
 #   why pick, why not pick, library (SF Public Library URL),
 #   link (one review per line, format: Label | URL)
 
@@ -15,8 +15,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #8a4b36
 - cover: https://groveatlantic.com/core/wp-content/uploads/2022/10/Covenant-of-Water_HC_OBC_coverOnlyFINAL-scaled.jpg
 - wikipedia: https://en.wikipedia.org/wiki/The_Covenant_of_Water
-- tags: literary, family saga, India, historical
-- themes: family, inheritance, faith, caste, grief
+- tags: literary, family saga, India, historical, caste, grief
 - why pick: My mom loved it (she also loved The Correspondent)! It's expansive, character-rich and has lots of family drama and secrets.
 - quote:
 - why not pick: It is long and seems emotionally dense and grief-y.
@@ -30,9 +29,8 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #476c78
 - cover: https://pictures.abebooks.com/inventory/32321594257.jpg
 - wikipedia: https://en.wikipedia.org/wiki/Flights_(novel)
-- tags: literary, fragmentary, travel, philosophical
+- tags: literary, fragmentary, travel, philosophical, dreamlike, rootlessness
 - why pick: This was my first Olga T book and I had devoured it. There's not much of a plot, but the individual stories were all interesting.
-- themes: eccentric, dreamlike, travel, impermanence, rootlessness
 - why not pick: There's not much of a plot. 
 - library: https://sfpl.bibliocommons.com/v2/search?query=flights&searchType=title
 - link: NYT review | https://www.nytimes.com/2018/08/14/books/review-flights-olga-tokarczuk.html
@@ -43,9 +41,8 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #7a5a22
 - cover: https://www.hachettebookgroup.com/wp-content/uploads/2024/08/9781538732182.jpg
 - wikipedia: https://en.wikipedia.org/wiki/Parable_of_the_Sower_(novel)
-- tags: dystopian, climate fiction, political, sci-fi
+- tags: dystopian, climate fiction, political, sci-fi, religion, inequality
 - why pick: This has been on my list forever. I don't know much about it except there is a dystopian society and that I've loved everything by Octavia Butler.
-- themes: societal collapse, survival, religion, climate change, inequality
 - why not pick: It sounds bleak and violent.
 - library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
 - link: NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
@@ -56,10 +53,9 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #47424f
 - cover: https://mpd-biblio-covers.imgix.net/9781250237484.jpg?v=2&w=900&dpr=2
 - wikipedia: https://en.wikipedia.org/wiki/Blindsight_(Watts_novel)
-- tags: hard sci-fi, consciousness, horror, aliens, creepy
+- tags: hard sci-fi, consciousness, horror, aliens, creepy, free will
 - why pick: I read this a few years ago. It was dense and hard to get through but very interesting in its discussion about the relationship between intelligence and consciousness and is uncannily relevant for our modern angst about whether LLMs are conscious. 
 - quote:
-- themes: consciousness, intelligence, first contact, identity, free will
 - why not pick: Dense, dark, and the characters can be hard to like. But the ideas are super cool!
 - library: https://sfpl.bibliocommons.com/v2/search?query=blindsight&searchType=title
 - link: WIRED | https://www.wired.com/2023/10/geeks-guide-peter-watts/
