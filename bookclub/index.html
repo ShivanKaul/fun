@@ -171,47 +171,40 @@
       color: var(--muted);
       font-size: 0.92rem;
       line-height: 1.45;
-      margin-top: auto;
     }
 
     .meta b {
       color: var(--ink);
     }
 
-    details {
-      border-top: 1px solid var(--line);
-      padding-top: 14px;
+    .quote {
+      margin: 0;
+      padding: 12px 14px;
+      border-left: 3px solid color-mix(in srgb, var(--accent) 60%, transparent);
+      background: color-mix(in srgb, var(--accent) 7%, white);
+      border-radius: 0 12px 12px 0;
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--ink);
     }
 
-    summary {
-      cursor: pointer;
-      color: color-mix(in srgb, var(--accent) 72%, black);
-      font-weight: 850;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: "+"; font-size: 1.25rem; }
-    details[open] summary::after { content: "–"; }
-
-    .expanded {
-      padding-top: 13px;
-      display: grid;
-      gap: 12px;
+    .quote cite {
+      display: block;
+      margin-top: 8px;
+      font-style: normal;
+      font-weight: 700;
+      font-size: 0.8rem;
       color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.48;
     }
 
     .review-links {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-top: 2px;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
     }
 
     .review-links a {
@@ -316,6 +309,11 @@
         } else if (key === 'link') {
           var parts = value.split('|');
           current.links.push({ label: parts[0].trim(), url: (parts[1] || '').trim() });
+        } else if (key === 'quote') {
+          if (value) {
+            var q = value.split('|');
+            current.quote = { text: q[0].trim(), cite: (q[1] || '').trim() };
+          }
         } else {
           current[key] = value;
         }
@@ -337,17 +335,19 @@
       if (book.angle) {
         meta += '<div><b>Best discussion angle:</b> ' + esc(book.angle) + '</div>';
       }
-      if (book.caveat) {
-        meta += '<div><b>Caveat:</b> ' + esc(book.caveat) + '</div>';
+      if (book['why pick']) {
+        meta += '<div><b>Why pick:</b> ' + esc(book['why pick']) + '</div>';
+      }
+      if (book['why not pick']) {
+        meta += '<div><b>Why not pick:</b> ' + esc(book['why not pick']) + '</div>';
       }
 
-      var details = '';
-      if (book.why || links) {
-        details =
-          '<details><summary>Why nominate it?</summary><div class="expanded">' +
-          (book.why ? '<div>' + esc(book.why) + '</div>' : '') +
-          (links ? '<div class="review-links">' + links + '</div>' : '') +
-          '</div></details>';
+      var quote = '';
+      if (book.quote) {
+        quote =
+          '<blockquote class="quote">' + esc(book.quote.text) +
+          (book.quote.cite ? '<cite>' + esc(book.quote.cite) + '</cite>' : '') +
+          '</blockquote>';
       }
 
       return (
@@ -362,8 +362,9 @@
             '</div>' +
             (tags ? '<div class="tags">' + tags + '</div>' : '') +
             (book.sell ? '<p class="sell">' + esc(book.sell) + '</p>' : '') +
+            quote +
             (meta ? '<div class="meta">' + meta + '</div>' : '') +
-            details +
+            (links ? '<div class="review-links">' + links + '</div>' : '') +
           '</div>' +
         '</article>'
       );
