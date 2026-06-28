@@ -22,7 +22,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - library: https://sfpl.bibliocommons.com/v2/search?query=the%20covenant%20of%20water&searchType=title
 - link: NYT review | https://www.nytimes.com/2023/05/02/books/review/covenant-of-water-abraham-verghese.html
 - link: Washington Post | https://www.washingtonpost.com/books/2023/05/03/oprah-pick-abraham-verghese-review/
-- link: NPR review | https://www.npr.org/2023/05/02/1172876657/the-covenant-of-water-abraham-verghese-review
+- link: NPR review | https://www.npr.org/2023/05/02/1173052459/cutting-for-stone-author-abraham-verghese-new-novel-the-covenant-of-water
 
 ## Flights
 - author: [Olga Tokarczuk](https://en.wikipedia.org/wiki/Olga_Tokarczuk)
