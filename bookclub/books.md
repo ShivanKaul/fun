@@ -1,7 +1,7 @@
 # Page settings (edit these, then each "## " below is one book card)
 #
 # Per-book fields you can edit:
-#   author (supports [name](url) links), accent (hex color), cover (image URL), tags (comma-separated),
+#   author (supports [name](url) links), accent (hex color), cover (image URL), wikipedia (book URL), tags (comma-separated),
 #   sell, quote (format: text | Source), themes (comma-separated),
 #   why pick, why not pick, library (SF Public Library URL),
 #   link (one review per line, format: Label | URL)
@@ -14,6 +14,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - author: [Abraham Verghese](https://en.wikipedia.org/wiki/Abraham_Verghese)
 - accent: #8a4b36
 - cover: https://groveatlantic.com/core/wp-content/uploads/2022/10/Covenant-of-Water_HC_OBC_coverOnlyFINAL-scaled.jpg
+- wikipedia: https://en.wikipedia.org/wiki/The_Covenant_of_Water
 - tags: literary, family saga, India, historical
 - themes: family, inheritance, faith, medicine, caste, grief
 - why pick: My mom loved it (she also loved The Correspondent)! It's expansive, character-rich and has lots of family drama and secrets.
@@ -28,6 +29,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - author: [Olga Tokarczuk](https://en.wikipedia.org/wiki/Olga_Tokarczuk)
 - accent: #476c78
 - cover: https://pictures.abebooks.com/inventory/32321594257.jpg
+- wikipedia: https://en.wikipedia.org/wiki/Flights_(novel)
 - tags: literary, fragmentary, travel, philosophical
 - why pick: This was my first Olga T book and I had devoured it. There's not much of a plot, but the individual stories were all interesting.
 - themes: eccentric, dreamlike, travel, impermanence, rootlessness
@@ -40,6 +42,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - author: [Octavia E. Butler](https://en.wikipedia.org/wiki/Octavia_E._Butler)
 - accent: #7a5a22
 - cover: https://www.hachettebookgroup.com/wp-content/uploads/2024/08/9781538732182.jpg
+- wikipedia: https://en.wikipedia.org/wiki/Parable_of_the_Sower_(novel)
 - tags: dystopian, climate fiction, political, sci-fi
 - why pick: This has been on my list forever. I don't know much about it except there is a dystopian society and that I've loved everything by Octavia Butler.
 - themes: societal collapse, survival, religion, climate change, inequality
@@ -52,6 +55,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - author: [Peter Watts](https://en.wikipedia.org/wiki/Peter_Watts_(author))
 - accent: #47424f
 - cover: https://mpd-biblio-covers.imgix.net/9781250237484.jpg?v=2&w=900&dpr=2
+- wikipedia: https://en.wikipedia.org/wiki/Blindsight_(Watts_novel)
 - tags: hard sci-fi, consciousness, horror, aliens, creepy
 - why pick: I read this a few years ago. It was dense and hard to get through but very interesting in its discussion about the relationship between intelligence and consciousness and is uncannily relevant for our modern angst about whether LLMs are conscious. 
 - quote:
