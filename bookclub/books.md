@@ -8,7 +8,7 @@
 
 eyebrow: Book Club
 title: Shivan's choices for next book pick
-intro: This is a selection of books that have been on my list for a long time + books I read a while ago and really want to re-read.
+intro: This is a selection of books that have been on my list for a long time + books I read a while ago and really want to re-read. Some reviews may be behind a paywall, but I made sure to include at least one open-access review for each book.
 
 ## The Covenant of Water
 - author: [Abraham Verghese](https://en.wikipedia.org/wiki/Abraham_Verghese)
