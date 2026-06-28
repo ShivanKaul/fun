@@ -15,10 +15,6 @@
       --card: #fffaf1;
       --line: rgba(32, 27, 22, 0.14);
       --shadow: 0 24px 80px rgba(58, 42, 28, 0.16);
-      --covenant: #8a4b36;
-      --flights: #476c78;
-      --parable: #7a5a22;
-      --blindsight: #47424f;
     }
 
     * { box-sizing: border-box; }
@@ -116,9 +112,7 @@
       padding: 22px 22px 12px;
     }
 
-    .cover-link {
-      display: contents;
-    }
+    .cover-link { display: contents; }
 
     .cover-link .cover {
       cursor: pointer;
@@ -208,9 +202,7 @@
       line-height: 1.45;
     }
 
-    .meta b {
-      color: var(--ink);
-    }
+    .meta b { color: var(--ink); }
 
     .quote {
       margin: 0;
@@ -326,16 +318,12 @@
   </main>
 
   <script>
-    // All content lives in books.md. Edit that file to change the page; no need to touch this HTML.
-
-    // Escape text so book content can never inject markup.
     function esc(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
       });
     }
 
-    // Escape text but turn inline [label](url) markdown links into anchors.
     function linkify(s) {
       var re = /\[([^\]]+)\]\((https?:\/\/[^\s]+?)\)(?=$|[\s,.;:])/g;
       var out = '';
@@ -350,7 +338,6 @@
       return out;
     }
 
-    // Parse books.md into { page: {...}, books: [...] }.
     function parseBooks(text) {
       var page = {};
       var books = [];
@@ -360,19 +347,14 @@
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         var trimmed = line.trim();
-        if (!trimmed || trimmed.charAt(0) === '#' && trimmed.indexOf('## ') !== 0) {
-          // Blank line or a "# " comment heading: skip.
-          continue;
-        }
+        if (!trimmed || trimmed.charAt(0) === '#' && trimmed.indexOf('## ') !== 0) { continue; }
 
         if (trimmed.indexOf('## ') === 0) {
-          // New book card.
           current = { title: trimmed.slice(3).trim(), tags: [], links: [] };
           books.push(current);
           continue;
         }
 
-        // Field line: either "- key: value" (book) or "key: value" (page setting).
         var body = trimmed.charAt(0) === '-' ? trimmed.slice(1).trim() : trimmed;
         var idx = body.indexOf(':');
         if (idx === -1) { continue; }
@@ -380,7 +362,6 @@
         var value = body.slice(idx + 1).trim();
 
         if (!current) {
-          // Page-level setting (before the first "## ").
           page[key] = value;
           continue;
         }
@@ -413,40 +394,28 @@
       }).join('');
 
       var meta = '';
-      if (book.themes) {
-        meta += '<div><b>Themes:</b> ' + esc(book.themes) + '</div>';
-      }
-      if (book['why pick']) {
-        meta += '<div><b>Why pick:</b> ' + esc(book['why pick']) + '</div>';
-      }
-      if (book['why not pick']) {
-        meta += '<div><b>Why not pick:</b> ' + esc(book['why not pick']) + '</div>';
-      }
+      if (book.themes) { meta += '<div><b>Themes:</b> ' + esc(book.themes) + '</div>'; }
+      if (book['why pick']) { meta += '<div><b>Why pick:</b> ' + esc(book['why pick']) + '</div>'; }
+      if (book['why not pick']) { meta += '<div><b>Why not pick:</b> ' + esc(book['why not pick']) + '</div>'; }
 
       var quote = '';
       if (book.quote) {
-        quote =
-          '<blockquote class="quote">' + esc(book.quote.text) +
+        quote = '<blockquote class="quote">' + esc(book.quote.text) +
           (book.quote.cite ? '<cite>' + esc(book.quote.cite) + '</cite>' : '') +
           '</blockquote>';
       }
 
-      // Footer: the SF Public Library link sits above its own labelled Reviews section.
       var library = book.library
         ? '<a class="library" href="' + esc(book.library) + '" target="_blank" rel="noopener">Find it at SF Public Library</a>'
         : '';
       var reviews = links
         ? '<div><div class="section-label">Reviews</div><div class="review-links">' + links + '</div></div>'
         : '';
-      var foot = (library || reviews)
-        ? '<div class="card-foot">' + library + reviews + '</div>'
-        : '';
+      var foot = (library || reviews) ? '<div class="card-foot">' + library + reviews + '</div>' : '';
 
-      var cover =
-        '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />';
-      // Make the cover link to the SF Public Library page when one is set.
-      if (book.library) {
-        cover = '<a class="cover-link" href="' + esc(book.library) + '" target="_blank" rel="noopener">' + cover + '</a>';
+      var cover = '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />';
+      if (book.wikipedia) {
+        cover = '<a class="cover-link" href="' + esc(book.wikipedia) + '" target="_blank" rel="noopener" aria-label="Open Wikipedia entry for ' + esc(book.title) + '">' + cover + '</a>';
       }
 
       return (
@@ -485,8 +454,7 @@
       })
       .then(function (text) { render(parseBooks(text)); })
       .catch(function (err) {
-        document.querySelector('.grid').innerHTML =
-          '<p class="sell">' + esc(err.message) + '</p>';
+        document.querySelector('.grid').innerHTML = '<p class="sell">' + esc(err.message) + '</p>';
       });
   </script>
 </body>
