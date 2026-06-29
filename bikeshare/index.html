@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SF Bay Wheels Coverage</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQFzsViWJxS6vl2A2uI65wJvRtZaJk=" crossorigin="" />
+  <style>
+    :root {
+      --bg: #f8f5ef;
+      --panel: rgba(255, 255, 255, 0.94);
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: rgba(31, 41, 51, 0.14);
+      --accent: #2458d3;
+      --covered: #167c4a;
+      --uncovered: #b42318;
+      --shadow: 0 18px 48px rgba(25, 36, 54, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 22px clamp(16px, 4vw, 42px);
+      border-bottom: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(36, 88, 211, 0.10), transparent 28rem),
+        radial-gradient(circle at 80% 0%, rgba(22, 124, 74, 0.10), transparent 28rem),
+        var(--bg);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.9rem, 4vw, 3.6rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+    }
+
+    .lede {
+      max-width: 68rem;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(92px, 1fr));
+      gap: 10px;
+      min-width: min(100%, 360px);
+    }
+
+    .stat {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.62);
+      box-shadow: 0 8px 28px rgba(25, 36, 54, 0.08);
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    main {
+      position: relative;
+      min-height: 0;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .panel {
+      position: absolute;
+      z-index: 500;
+      top: 18px;
+      left: 18px;
+      width: min(410px, calc(100vw - 36px));
+      max-height: calc(100% - 36px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .panel-section {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-section:last-child { border-bottom: 0; }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    input, textarea, button {
+      font: inherit;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 118px;
+      resize: vertical;
+      line-height: 1.4;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.85rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    button:hover { filter: brightness(1.06); }
+
+    .hint, .status, .results {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .status { margin-top: 10px; }
+
+    .legend {
+      display: grid;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 0.87rem;
+    }
+
+    .key {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid currentColor;
+      flex: 0 0 auto;
+    }
+
+    .coverage { color: var(--covered); }
+    .station { color: var(--accent); }
+    .miss { color: var(--uncovered); }
+
+    .results {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .result {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .result b { color: var(--ink); }
+
+    .leaflet-popup-content { line-height: 1.35; }
+
+    @media (max-width: 860px) {
+      body { grid-template-rows: auto 68vh; }
+      header { grid-template-columns: 1fr; }
+      .stats { width: 100%; }
+      .panel {
+        position: relative;
+        inset: auto;
+        width: auto;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+      }
+      main {
+        display: grid;
+        grid-template-rows: 1fr auto;
+      }
+      #map { position: relative; min-height: 58vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>SF Bay Wheels coverage</h1>
+      <p class="lede">A static map for finding apartments that are outside a rough five-minute walk from a Bay Wheels dock. Coverage uses a configurable straight-line radius, so treat it as a fast screen rather than a true walking-network isochrone.</p>
+    </div>
+    <div class="stats" aria-label="Map statistics">
+      <div class="stat"><b id="station-count">—</b><span>SF stations</span></div>
+      <div class="stat"><b id="radius-label">400m</b><span>radius</span></div>
+      <div class="stat"><b id="apartment-count">0</b><span>apartments</span></div>
+    </div>
+  </header>
+
+  <main>
+    <div id="map" aria-label="Map of San Francisco Bay Wheels coverage"></div>
+
+    <aside class="panel" aria-label="Map controls">
+      <section class="panel-section">
+        <h2>Coverage settings</h2>
+        <label for="radius">Five-minute walk approximation, in meters</label>
+        <input id="radius" type="number" min="100" max="1200" step="25" value="400" />
+        <div class="controls">
+          <button id="apply-radius">Update radius</button>
+          <button class="secondary" id="fit-sf">Fit SF</button>
+        </div>
+        <p class="status" id="status">Loading Bay Wheels stations…</p>
+      </section>
+
+      <section class="panel-section">
+        <h2>Apartment check</h2>
+        <p class="hint">Paste apartments as CSV: <code>name,lat,lng</code>. Addresses are not geocoded; use Google Maps to copy coordinates, or export from your apartment list.</p>
+        <label for="apartments">Apartments</label>
+        <textarea id="apartments" spellcheck="false" placeholder="Example:\nHayes Valley option,37.7767,-122.4241\nOuter Richmond option,37.7800,-122.5000"></textarea>
+        <div class="controls">
+          <button id="check-apartments">Check apartments</button>
+          <button class="secondary" id="clear-apartments">Clear</button>
+        </div>
+        <div class="results" id="results"></div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Legend</h2>
+        <div class="legend">
+          <div class="key"><span class="swatch station"></span> Bay Wheels dock</div>
+          <div class="key"><span class="swatch coverage"></span> Approximate five-minute coverage</div>
+          <div class="key"><span class="swatch miss"></span> Apartment farther than radius</div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
+    const GBFS_URLS = [
+      'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_information.json',
+      'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_information.json',
+      'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_information.json'
+    ];
+
+    const stationCount = document.getElementById('station-count');
+    const radiusInput = document.getElementById('radius');
+    const radiusLabel = document.getElementById('radius-label');
+    const apartmentCount = document.getElementById('apartment-count');
+    const statusEl = document.getElementById('status');
+    const apartmentInput = document.getElementById('apartments');
+    const resultsEl = document.getElementById('results');
+
+    const map = L.map('map', { preferCanvas: true }).fitBounds(SF_BOUNDS);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let stations = [];
+    let stationLayer = L.layerGroup().addTo(map);
+    let coverageLayer = L.layerGroup().addTo(map);
+    let apartmentLayer = L.layerGroup().addTo(map);
+
+    function isInSf(station) {
+      return station.lat >= SF_BOUNDS[0][0] && station.lat <= SF_BOUNDS[1][0]
+        && station.lon >= SF_BOUNDS[0][1] && station.lon <= SF_BOUNDS[1][1];
+    }
+
+    function metersBetween(aLat, aLng, bLat, bLng) {
+      const r = 6371000;
+      const toRad = Math.PI / 180;
+      const dLat = (bLat - aLat) * toRad;
+      const dLng = (bLng - aLng) * toRad;
+      const lat1 = aLat * toRad;
+      const lat2 = bLat * toRad;
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return 2 * r * Math.asin(Math.sqrt(h));
+    }
+
+    function nearestStation(lat, lng) {
+      let best = null;
+      for (const station of stations) {
+        const distance = metersBetween(lat, lng, station.lat, station.lon);
+        if (!best || distance < best.distance) {
+          best = { station, distance };
+        }
+      }
+      return best;
+    }
+
+    function renderStations() {
+      stationLayer.clearLayers();
+      for (const station of stations) {
+        L.circleMarker([station.lat, station.lon], {
+          radius: 4,
+          weight: 1,
+          color: '#2458d3',
+          fillColor: '#2458d3',
+          fillOpacity: 0.92
+        }).bindPopup(`<b>${escapeHtml(station.name || 'Bay Wheels station')}</b>`).addTo(stationLayer);
+      }
+    }
+
+    function renderCoverage() {
+      coverageLayer.clearLayers();
+      const radius = Number(radiusInput.value) || 400;
+      radiusLabel.textContent = `${radius}m`;
+      for (const station of stations) {
+        L.circle([station.lat, station.lon], {
+          radius,
+          stroke: false,
+          fillColor: '#167c4a',
+          fillOpacity: 0.11,
+          interactive: false
+        }).addTo(coverageLayer);
+      }
+    }
+
+    function parseApartments(text) {
+      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((line, index) => {
+        const parts = line.split(',').map(part => part.trim());
+        if (parts.length < 3) { return null; }
+        const lng = Number(parts.pop());
+        const lat = Number(parts.pop());
+        const name = parts.join(', ') || `Apartment ${index + 1}`;
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) { return null; }
+        return { name, lat, lng };
+      }).filter(Boolean);
+    }
+
+    function checkApartments() {
+      apartmentLayer.clearLayers();
+      resultsEl.innerHTML = '';
+      const radius = Number(radiusInput.value) || 400;
+      const apartments = parseApartments(apartmentInput.value);
+      apartmentCount.textContent = String(apartments.length);
+
+      if (!apartments.length) {
+        resultsEl.innerHTML = '<div class="result">No valid apartment rows found.</div>';
+        return;
+      }
+
+      const bounds = [];
+      const sorted = apartments.map(apartment => {
+        const nearest = nearestStation(apartment.lat, apartment.lng);
+        return { ...apartment, nearest, covered: nearest && nearest.distance <= radius };
+      }).sort((a, b) => (b.nearest?.distance || 0) - (a.nearest?.distance || 0));
+
+      for (const apartment of sorted) {
+        const color = apartment.covered ? '#167c4a' : '#b42318';
+        const distance = apartment.nearest ? Math.round(apartment.nearest.distance) : null;
+        const popup = `<b>${escapeHtml(apartment.name)}</b><br>${apartment.covered ? 'Within' : 'Outside'} ${radius}m<br>${distance}m to ${escapeHtml(apartment.nearest?.station.name || 'nearest station')}`;
+        L.circleMarker([apartment.lat, apartment.lng], {
+          radius: 7,
+          weight: 2,
+          color,
+          fillColor: color,
+          fillOpacity: 0.9
+        }).bindPopup(popup).addTo(apartmentLayer);
+        bounds.push([apartment.lat, apartment.lng]);
+
+        const result = document.createElement('div');
+        result.className = 'result';
+        result.innerHTML = `<b>${escapeHtml(apartment.name)}</b><br>${apartment.covered ? 'Inside' : 'Outside'} radius; ${distance}m to ${escapeHtml(apartment.nearest?.station.name || 'nearest station')}.`;
+        resultsEl.appendChild(result);
+      }
+
+      if (bounds.length) {
+        map.fitBounds(L.latLngBounds(bounds).pad(0.2));
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[char]));
+    }
+
+    async function fetchStations() {
+      let lastError;
+      for (const url of GBFS_URLS) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) { throw new Error(`${response.status} ${response.statusText}`); }
+          const json = await response.json();
+          const rawStations = json.data && Array.isArray(json.data.stations) ? json.data.stations : [];
+          stations = rawStations.filter(isInSf).map(station => ({
+            id: station.station_id,
+            name: station.name,
+            lat: Number(station.lat),
+            lon: Number(station.lon)
+          })).filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lon));
+
+          if (!stations.length) { throw new Error('No SF stations found in feed.'); }
+          stationCount.textContent = String(stations.length);
+          statusEl.textContent = `Loaded ${stations.length} SF stations from Bay Wheels GBFS.`;
+          renderStations();
+          renderCoverage();
+          return;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      statusEl.textContent = `Could not load Bay Wheels station data: ${lastError?.message || 'unknown error'}.`;
+    }
+
+    document.getElementById('apply-radius').addEventListener('click', () => {
+      renderCoverage();
+      if (apartmentInput.value.trim()) { checkApartments(); }
+    });
+
+    document.getElementById('check-apartments').addEventListener('click', checkApartments);
+    document.getElementById('clear-apartments').addEventListener('click', () => {
+      apartmentInput.value = '';
+      apartmentCount.textContent = '0';
+      apartmentLayer.clearLayers();
+      resultsEl.innerHTML = '';
+    });
+    document.getElementById('fit-sf').addEventListener('click', () => map.fitBounds(SF_BOUNDS));
+
+    fetchStations();
+  </script>
+</body>
+</html>
