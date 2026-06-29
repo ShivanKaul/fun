@@ -42,7 +42,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - cover: https://www.hachettebookgroup.com/wp-content/uploads/2024/08/9781538732182.jpg
 - wikipedia: https://en.wikipedia.org/wiki/Parable_of_the_Sower_(novel)
 - tags: dystopian, climate fiction, political, sci-fi, religion, inequality
-- why pick: This has been on my list forever. I don't know much about it except there is a dystopian society and that I've loved everything by Octavia Butler.
+- why pick: This has been on my list forever. I don't know much about it except that there's a dystopian society involved and that I've loved everything I've read by Octavia Butler.
 - why not pick: It sounds bleak and violent.
 - library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
 - link: NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
