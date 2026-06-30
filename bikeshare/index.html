@@ -11,25 +11,26 @@
   <header>
     <div>
       <h1>SF Bay Wheels coverage</h1>
-      <p class="lede">A static map of San Francisco Bay Wheels docks and rough walking coverage. Station data is prebuilt into this site, so the map does not depend on live GBFS requests from your browser.</p>
+      <p class="lede">A static heat map of approximate walking time to Bay Wheels docks in San Francisco. Station data is prebuilt into this site, so the map does not depend on live GBFS requests from your browser.</p>
     </div>
     <div class="stats" aria-label="Map statistics">
       <div class="stat"><b id="station-count">—</b><span>stations</span></div>
       <div class="stat"><b id="bike-count">—</b><span>bikes now</span></div>
-      <div class="stat"><b id="radius-label">400m</b><span>radius</span></div>
+      <div class="stat"><b id="radius-label">400m</b><span>5-minute edge</span></div>
+      <div class="stat"><b id="heat-count">—</b><span>heat cells</span></div>
     </div>
   </header>
 
   <main>
     <div id="map" aria-label="Map of San Francisco Bay Wheels coverage"></div>
-    <canvas id="coverage-canvas" aria-hidden="true"></canvas>
+    <canvas id="heat-canvas" aria-hidden="true"></canvas>
 
     <aside class="panel" aria-label="Map controls">
       <section class="panel-section">
-        <h2>Coverage</h2>
+        <h2>Map</h2>
         <div class="row">
           <div>
-            <label for="radius">Radius</label>
+            <label for="radius">5-minute approximation</label>
             <input id="radius" type="number" min="100" max="1200" step="25" value="400" />
           </div>
           <div>
@@ -42,7 +43,7 @@
           </div>
         </div>
         <div class="toggles">
-          <label class="toggle"><input id="show-coverage" type="checkbox" checked /> Show coverage</label>
+          <label class="toggle"><input id="show-heat" type="checkbox" checked /> Show heat map</label>
           <label class="toggle"><input id="show-stations" type="checkbox" checked /> Show station dots</label>
         </div>
         <div class="controls">
@@ -53,12 +54,28 @@
       </section>
 
       <section class="panel-section">
-        <h2>Legend</h2>
+        <h2>Select a point or enter an address</h2>
+        <p class="note">Click the map, paste coordinates, paste a Google Maps link, or search for an address in San Francisco.</p>
+        <label for="address">Address or coordinates</label>
+        <input id="address" type="text" placeholder="550 Divisadero St or 37.7767,-122.4241" />
+        <div class="controls">
+          <button id="find-address">Analyze</button>
+          <button class="secondary" id="clear-selection">Clear</button>
+        </div>
+        <div class="selection-summary" id="selection-summary"></div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Heat scale</h2>
         <div class="legend">
-          <div class="key"><span class="swatch coverage"></span> Rough walking coverage</div>
+          <div class="key"><span class="swatch excellent"></span> Under 2 min</div>
+          <div class="key"><span class="swatch good"></span> 2–5 min</div>
+          <div class="key"><span class="swatch okay"></span> 5–8 min</div>
+          <div class="key"><span class="swatch poor"></span> 8–12 min</div>
+          <div class="key"><span class="swatch bad"></span> Over 12 min</div>
           <div class="key"><span class="swatch station"></span> Bay Wheels station</div>
         </div>
-        <p class="note">Coverage is a straight-line radius, not a street-network isochrone. Use it as a fast screen, not a routing guarantee.</p>
+        <p class="note">This is a straight-line approximation, not a street-network isochrone. Use it as a fast screen, not a routing guarantee.</p>
       </section>
     </aside>
   </main>
