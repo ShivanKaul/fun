@@ -1,0 +1,29 @@
+name: Update Bay Wheels data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-bikeshare-data.yml'
+      - 'bikeshare/scripts/update-stations.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node bikeshare/scripts/update-stations.mjs
+      - name: Commit updated station data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update Bay Wheels station data
+          file_pattern: bikeshare/stations.json
