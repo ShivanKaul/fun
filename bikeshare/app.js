@@ -1,6 +1,7 @@
 const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
 const SF_MAX_BOUNDS = [[37.660, -122.560], [37.855, -122.320]];
 const WALK_METERS_PER_MINUTE = 80;
+const WALK_METERS_PER_SECOND = WALK_METERS_PER_MINUTE / 60;
 const GRID_STEP_DEG = 0.0045;
 const FIVE_MINUTE_EDGE_METERS = WALK_METERS_PER_MINUTE * 5;
 
@@ -35,10 +36,76 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 let stations = [];
+let walkNetwork = null;
 let stationLayer = L.layerGroup().addTo(map);
 let selectionLayer = L.layerGroup().addTo(map);
 let heatCells = [];
+let travelTimes = null;
 let redrawTimer = null;
+let statusParts = [];
+
+class PriorityQueue {
+  constructor() {
+    this.items = [];
+  }
+
+  push(node, priority, sourceIndex) {
+    const item = { node, priority, sourceIndex };
+    this.items.push(item);
+    this.bubbleUp(this.items.length - 1);
+  }
+
+  pop() {
+    if (!this.items.length) { return null; }
+    const top = this.items[0];
+    const end = this.items.pop();
+    if (this.items.length) {
+      this.items[0] = end;
+      this.sinkDown(0);
+    }
+    return top;
+  }
+
+  bubbleUp(index) {
+    const item = this.items[index];
+    while (index > 0) {
+      const parentIndex = Math.floor((index - 1) / 2);
+      const parent = this.items[parentIndex];
+      if (item.priority >= parent.priority) { break; }
+      this.items[parentIndex] = item;
+      this.items[index] = parent;
+      index = parentIndex;
+    }
+  }
+
+  sinkDown(index) {
+    const length = this.items.length;
+    const item = this.items[index];
+    while (true) {
+      const leftIndex = (index * 2) + 1;
+      const rightIndex = leftIndex + 1;
+      let swapIndex = null;
+
+      if (leftIndex < length && this.items[leftIndex].priority < item.priority) {
+        swapIndex = leftIndex;
+      }
+      if (rightIndex < length) {
+        const right = this.items[rightIndex];
+        const compare = swapIndex === null ? item.priority : this.items[leftIndex].priority;
+        if (right.priority < compare) { swapIndex = rightIndex; }
+      }
+      if (swapIndex === null) { break; }
+      this.items[index] = this.items[swapIndex];
+      this.items[swapIndex] = item;
+      index = swapIndex;
+    }
+  }
+}
+
+function setStatus(parts) {
+  statusParts = parts.filter(Boolean);
+  statusEl.textContent = statusParts.join(' ');
+}
 
 function isOperational(station) {
   return station.is_operational !== false;
@@ -69,11 +136,15 @@ function metersBetween(aLat, aLng, bLat, bLng) {
   return 2 * r * Math.asin(Math.sqrt(h));
 }
 
-function minutesFromMeters(meters) {
-  return meters / WALK_METERS_PER_MINUTE;
+function secondsFromMeters(meters) {
+  return meters / WALK_METERS_PER_SECOND;
 }
 
-function nearestStation(lat, lon) {
+function minutesFromSeconds(seconds) {
+  return seconds / 60;
+}
+
+function nearestStationByAir(lat, lon) {
   let best = null;
   for (const station of activeStations()) {
     const distance = metersBetween(lat, lon, station.lat, station.lon);
@@ -140,21 +211,139 @@ function resizeHeatCanvas() {
   heatCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
+function normalizeNetwork(rawNetwork) {
+  if (!rawNetwork || !Array.isArray(rawNetwork.nodes) || !Array.isArray(rawNetwork.edges)) {
+    return null;
+  }
+
+  const nodes = rawNetwork.nodes
+    .map(node => ({ lat: Number(node[0]), lon: Number(node[1]) }))
+    .filter(node => Number.isFinite(node.lat) && Number.isFinite(node.lon));
+  if (!nodes.length) { return null; }
+
+  const adjacency = Array.from({ length: nodes.length }, () => []);
+  for (const edge of rawNetwork.edges) {
+    const from = Number(edge[0]);
+    const to = Number(edge[1]);
+    const seconds = Number(edge[2]);
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= nodes.length || to >= nodes.length || !Number.isFinite(seconds)) {
+      continue;
+    }
+    adjacency[from].push([to, seconds]);
+    adjacency[to].push([from, seconds]);
+  }
+
+  return { nodes, adjacency, metadata: rawNetwork };
+}
+
+async function loadWalkNetwork() {
+  try {
+    const response = await fetch('walk-network.json', { cache: 'no-store' });
+    if (!response.ok) { throw new Error(`${response.status} ${response.statusText}`); }
+    const network = normalizeNetwork(await response.json());
+    if (!network) { throw new Error('Invalid network data.'); }
+    walkNetwork = network;
+    const generatedAt = network.metadata.generated_at ? new Date(network.metadata.generated_at).toLocaleString() : 'unknown time';
+    return `Loaded walking network with ${walkNetwork.nodes.length} nodes. Last generated: ${generatedAt}.`;
+  } catch (error) {
+    walkNetwork = null;
+    return `Walking network unavailable; using straight-line fallback. ${error.message}`;
+  }
+}
+
+function nearestNetworkNode(lat, lon) {
+  if (!walkNetwork) { return null; }
+  let best = null;
+  for (let index = 0; index < walkNetwork.nodes.length; index += 1) {
+    const node = walkNetwork.nodes[index];
+    const distance = metersBetween(lat, lon, node.lat, node.lon);
+    if (!best || distance < best.distance) {
+      best = { index, distance };
+    }
+  }
+  return best;
+}
+
+function computeTravelTimes() {
+  if (!walkNetwork) {
+    travelTimes = null;
+    return;
+  }
+
+  const distances = new Float64Array(walkNetwork.nodes.length);
+  const sources = new Int32Array(walkNetwork.nodes.length);
+  distances.fill(Infinity);
+  sources.fill(-1);
+  const queue = new PriorityQueue();
+  const currentStations = activeStations();
+
+  currentStations.forEach((station, stationIndex) => {
+    const snap = nearestNetworkNode(station.lat, station.lon);
+    if (!snap) { return; }
+    const accessSeconds = secondsFromMeters(snap.distance);
+    if (accessSeconds < distances[snap.index]) {
+      distances[snap.index] = accessSeconds;
+      sources[snap.index] = stationIndex;
+      queue.push(snap.index, accessSeconds, stationIndex);
+    }
+  });
+
+  while (queue.items.length) {
+    const item = queue.pop();
+    if (item.priority !== distances[item.node]) { continue; }
+    for (const [neighbor, seconds] of walkNetwork.adjacency[item.node]) {
+      const next = item.priority + seconds;
+      if (next < distances[neighbor]) {
+        distances[neighbor] = next;
+        sources[neighbor] = item.sourceIndex;
+        queue.push(neighbor, next, item.sourceIndex);
+      }
+    }
+  }
+
+  travelTimes = { distances, sources, activeStations: currentStations };
+}
+
+function walkingResult(lat, lon) {
+  if (!walkNetwork || !travelTimes) { return null; }
+  const snap = nearestNetworkNode(lat, lon);
+  if (!snap) { return null; }
+  const networkSeconds = travelTimes.distances[snap.index];
+  const sourceIndex = travelTimes.sources[snap.index];
+  if (!Number.isFinite(networkSeconds) || sourceIndex < 0) { return null; }
+  return {
+    station: travelTimes.activeStations[sourceIndex],
+    seconds: networkSeconds + secondsFromMeters(snap.distance),
+    accessDistance: snap.distance
+  };
+}
+
+function bestTravelResult(lat, lon) {
+  const walking = walkingResult(lat, lon);
+  if (walking) { return { ...walking, mode: 'walking-network' }; }
+
+  const byAir = nearestStationByAir(lat, lon);
+  if (!byAir) { return null; }
+  return {
+    station: byAir.station,
+    seconds: secondsFromMeters(byAir.distance),
+    accessDistance: 0,
+    mode: 'straight-line',
+    distance: byAir.distance
+  };
+}
+
 function buildHeatCells() {
   const cells = [];
-  const stationsToUse = activeStations();
-
-  if (!stationsToUse.length) {
-    return cells;
-  }
+  if (!activeStations().length) { return cells; }
 
   for (let lat = SF_BOUNDS[0][0]; lat <= SF_BOUNDS[1][0]; lat += GRID_STEP_DEG) {
     for (let lon = SF_BOUNDS[0][1]; lon <= SF_BOUNDS[1][1]; lon += GRID_STEP_DEG) {
       const centerLat = lat + GRID_STEP_DEG / 2;
       const centerLon = lon + GRID_STEP_DEG / 2;
-      const nearest = nearestStation(centerLat, centerLon);
-      if (!nearest) { continue; }
-      const minutes = minutesFromMeters(nearest.distance);
+      const result = bestTravelResult(centerLat, centerLon);
+      if (!result) { continue; }
+      const minutes = minutesFromSeconds(result.seconds);
       cells.push({
         nw: [lat + GRID_STEP_DEG, lon],
         se: [lat, lon + GRID_STEP_DEG],
@@ -199,6 +388,7 @@ function updateStats() {
 function rebuildHeatAndRedraw() {
   updateStats();
   renderStations();
+  computeTravelTimes();
   heatCells = buildHeatCells();
   renderHeat();
   rerenderSelection();
@@ -261,18 +451,18 @@ async function geocodeAddress(query) {
 
 function renderSelection(point) {
   selectionLayer.clearLayers();
-  const nearest = nearestStation(point.lat, point.lon);
+  const result = bestTravelResult(point.lat, point.lon);
 
-  if (!nearest) {
+  if (!result) {
     summaryEl.innerHTML = '<div class="summary-card">No active station data available for this mode.</div>';
     return;
   }
 
-  const minutes = minutesFromMeters(nearest.distance);
+  const minutes = minutesFromSeconds(result.seconds);
   const grade = gradeForMinutes(minutes);
-  const distance = Math.round(nearest.distance);
-  const station = nearest.station;
-  const popup = `<b>${escapeHtml(point.label)}</b><br>${minutes.toFixed(1)} min to ${escapeHtml(station.name)}<br>${distance}m straight-line distance`;
+  const station = result.station;
+  const fallbackCopy = result.mode === 'straight-line' ? ' Straight-line fallback.' : '';
+  const popup = `<b>${escapeHtml(point.label)}</b><br>${minutes.toFixed(1)} min to ${escapeHtml(station.name)}${fallbackCopy}`;
 
   L.circleMarker([point.lat, point.lon], {
     radius: 8,
@@ -285,7 +475,7 @@ function renderSelection(point) {
   summaryEl.innerHTML = `
     <div class="summary-card">
       <b>${escapeHtml(point.label)} <span class="badge ${grade.label}">${grade.label}</span></b>
-      ${minutes.toFixed(1)} min to ${escapeHtml(station.name)}. ${distance}m straight-line distance.
+      ${minutes.toFixed(1)} min to ${escapeHtml(station.name)}.${fallbackCopy}
     </div>
     <div class="summary-card">
       <b>Availability</b>
@@ -317,17 +507,18 @@ async function analyzeAddress() {
 
 async function loadStations() {
   try {
-    const response = await fetch('stations.json', { cache: 'no-store' });
-    if (!response.ok) { throw new Error(`${response.status} ${response.statusText}`); }
-    const data = await response.json();
+    const stationResponse = await fetch('stations.json', { cache: 'no-store' });
+    if (!stationResponse.ok) { throw new Error(`${stationResponse.status} ${stationResponse.statusText}`); }
+    const data = await stationResponse.json();
     stations = Array.isArray(data.stations) ? data.stations : [];
     stations = stations.filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lon));
     if (!stations.length) { throw new Error('No station data found. The scheduled data update may not have run yet.'); }
     const generatedAt = data.generated_at ? new Date(data.generated_at).toLocaleString() : 'unknown time';
-    statusEl.textContent = `Loaded ${stations.length} stations from local static data. Last generated: ${generatedAt}.`;
+    const networkStatus = await loadWalkNetwork();
+    setStatus([`Loaded ${stations.length} stations from local static data. Last generated: ${generatedAt}.`, networkStatus]);
     rebuildHeatAndRedraw();
   } catch (error) {
-    statusEl.textContent = `Could not load local station data: ${error.message}`;
+    setStatus([`Could not load local station data: ${error.message}`]);
     resizeHeatCanvas();
   }
 }
