@@ -56,7 +56,7 @@
     }
 
     .lede {
-      max-width: 68rem;
+      max-width: 70rem;
       margin: 0;
       color: var(--muted);
       line-height: 1.5;
@@ -65,9 +65,9 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(92px, 1fr));
+      grid-template-columns: repeat(4, minmax(84px, 1fr));
       gap: 10px;
-      min-width: min(100%, 360px);
+      min-width: min(100%, 460px);
     }
 
     .stat {
@@ -83,13 +83,14 @@
       font-size: 1.35rem;
       line-height: 1.05;
       letter-spacing: -0.04em;
+      white-space: nowrap;
     }
 
     .stat span {
       display: block;
       margin-top: 4px;
       color: var(--muted);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.07em;
@@ -111,7 +112,7 @@
       z-index: 500;
       top: 18px;
       left: 18px;
-      width: min(410px, calc(100vw - 36px));
+      width: min(440px, calc(100vw - 36px));
       max-height: calc(100% - 36px);
       overflow: auto;
       border: 1px solid var(--line);
@@ -142,11 +143,11 @@
       font-weight: 750;
     }
 
-    input, textarea, button {
+    input, textarea, button, select {
       font: inherit;
     }
 
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -156,11 +157,37 @@
     }
 
     textarea {
-      min-height: 118px;
+      min-height: 128px;
       resize: vertical;
       line-height: 1.4;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       font-size: 0.85rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .toggles {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .toggle {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.3;
+    }
+
+    .toggle input {
+      width: auto;
+      margin: 0;
     }
 
     .controls {
@@ -236,12 +263,34 @@
 
     .result b { color: var(--ink); }
 
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin-left: 4px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #fff;
+      vertical-align: 1px;
+    }
+
+    .badge.covered { background: var(--covered); color: #fff; }
+    .badge.miss { background: var(--uncovered); color: #fff; }
+
+    code {
+      color: var(--ink);
+      background: rgba(31, 41, 51, 0.07);
+      border-radius: 6px;
+      padding: 1px 4px;
+    }
+
     .leaflet-popup-content { line-height: 1.35; }
 
-    @media (max-width: 860px) {
+    @media (max-width: 960px) {
       body { grid-template-rows: auto 68vh; }
       header { grid-template-columns: 1fr; }
-      .stats { width: 100%; }
+      .stats { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .panel {
         position: relative;
         inset: auto;
@@ -258,16 +307,21 @@
       }
       #map { position: relative; min-height: 58vh; }
     }
+
+    @media (max-width: 520px) {
+      .row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <header>
     <div>
       <h1>SF Bay Wheels coverage</h1>
-      <p class="lede">A static map for finding apartments that are outside a rough five-minute walk from a Bay Wheels dock. Coverage uses a configurable straight-line radius, so treat it as a fast screen rather than a true walking-network isochrone.</p>
+      <p class="lede">A static map for finding apartments that are outside a rough five-minute walk from a Bay Wheels dock. It discovers current GBFS feeds, shows live dock availability, and checks pasted apartment coordinates or Google Maps links.</p>
     </div>
     <div class="stats" aria-label="Map statistics">
-      <div class="stat"><b id="station-count">—</b><span>SF stations</span></div>
+      <div class="stat"><b id="station-count">—</b><span>docks counted</span></div>
+      <div class="stat"><b id="bike-count">—</b><span>bikes now</span></div>
       <div class="stat"><b id="radius-label">400m</b><span>radius</span></div>
       <div class="stat"><b id="apartment-count">0</b><span>apartments</span></div>
     </div>
@@ -279,10 +333,26 @@
     <aside class="panel" aria-label="Map controls">
       <section class="panel-section">
         <h2>Coverage settings</h2>
-        <label for="radius">Five-minute walk approximation, in meters</label>
-        <input id="radius" type="number" min="100" max="1200" step="25" value="400" />
+        <div class="row">
+          <div>
+            <label for="radius">Five-minute walk approximation</label>
+            <input id="radius" type="number" min="100" max="1200" step="25" value="400" />
+          </div>
+          <div>
+            <label for="coverage-mode">Stations to count</label>
+            <select id="coverage-mode">
+              <option value="all">All SF docks</option>
+              <option value="operational">Operational docks</option>
+              <option value="bikes">Docks with bikes now</option>
+            </select>
+          </div>
+        </div>
+        <div class="toggles">
+          <label class="toggle"><input id="show-coverage" type="checkbox" checked /> Show coverage circles</label>
+          <label class="toggle"><input id="show-stations" type="checkbox" checked /> Show station markers</label>
+        </div>
         <div class="controls">
-          <button id="apply-radius">Update radius</button>
+          <button id="apply-radius">Update map</button>
           <button class="secondary" id="fit-sf">Fit SF</button>
         </div>
         <p class="status" id="status">Loading Bay Wheels stations…</p>
@@ -290,11 +360,15 @@
 
       <section class="panel-section">
         <h2>Apartment check</h2>
-        <p class="hint">Paste apartments as CSV: <code>name,lat,lng</code>. Addresses are not geocoded; use Google Maps to copy coordinates, or export from your apartment list.</p>
+        <p class="hint">Paste rows as <code>name,lat,lng</code>, <code>lat,lng</code>, or Google Maps links containing coordinates. You can also click the map to drop a candidate pin.</p>
         <label for="apartments">Apartments</label>
-        <textarea id="apartments" spellcheck="false" placeholder="Example:\nHayes Valley option,37.7767,-122.4241\nOuter Richmond option,37.7800,-122.5000"></textarea>
+        <textarea id="apartments" spellcheck="false" placeholder="Examples:
+Hayes Valley option,37.7767,-122.4241
+37.7800,-122.5000
+https://maps.google.com/?q=37.7767,-122.4241"></textarea>
         <div class="controls">
           <button id="check-apartments">Check apartments</button>
+          <button class="secondary" id="download-results">Download CSV</button>
           <button class="secondary" id="clear-apartments">Clear</button>
         </div>
         <div class="results" id="results"></div>
@@ -314,19 +388,36 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
-    const GBFS_URLS = [
-      'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_information.json',
-      'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_information.json',
-      'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_information.json'
+    const GBFS_DISCOVERY_URLS = [
+      'https://gbfs.lyft.com/gbfs/2.3/bay/en/gbfs.json',
+      'https://gbfs.baywheels.com/gbfs/2.3/gbfs.json',
+      'https://gbfs.lyft.com/gbfs/2.2/bay/en/gbfs.json',
+      'https://gbfs.lyft.com/gbfs/1.1/bay/en/gbfs.json'
     ];
+    const FALLBACK_FEEDS = {
+      station_information: [
+        'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_information.json',
+        'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_information.json',
+        'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_information.json'
+      ],
+      station_status: [
+        'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_status.json',
+        'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_status.json',
+        'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_status.json'
+      ]
+    };
 
     const stationCount = document.getElementById('station-count');
+    const bikeCount = document.getElementById('bike-count');
     const radiusInput = document.getElementById('radius');
     const radiusLabel = document.getElementById('radius-label');
     const apartmentCount = document.getElementById('apartment-count');
     const statusEl = document.getElementById('status');
     const apartmentInput = document.getElementById('apartments');
     const resultsEl = document.getElementById('results');
+    const coverageMode = document.getElementById('coverage-mode');
+    const showCoverage = document.getElementById('show-coverage');
+    const showStations = document.getElementById('show-stations');
 
     const map = L.map('map', { preferCanvas: true }).fitBounds(SF_BOUNDS);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -335,6 +426,7 @@
     }).addTo(map);
 
     let stations = [];
+    let lastApartmentResults = [];
     let stationLayer = L.layerGroup().addTo(map);
     let coverageLayer = L.layerGroup().addTo(map);
     let apartmentLayer = L.layerGroup().addTo(map);
@@ -355,9 +447,30 @@
       return 2 * r * Math.asin(Math.sqrt(h));
     }
 
+    function isOperational(station) {
+      const status = station.status;
+      if (!status) { return true; }
+      return status.is_installed !== 0 && status.is_renting !== 0 && status.is_returning !== 0;
+    }
+
+    function hasBikesNow(station) {
+      const status = station.status;
+      return isOperational(station) && Number(status?.num_bikes_available || 0) > 0;
+    }
+
+    function activeStations() {
+      if (coverageMode.value === 'bikes') {
+        return stations.filter(hasBikesNow);
+      }
+      if (coverageMode.value === 'operational') {
+        return stations.filter(isOperational);
+      }
+      return stations;
+    }
+
     function nearestStation(lat, lng) {
       let best = null;
-      for (const station of stations) {
+      for (const station of activeStations()) {
         const distance = metersBetween(lat, lng, station.lat, station.lon);
         if (!best || distance < best.distance) {
           best = { station, distance };
@@ -366,16 +479,36 @@
       return best;
     }
 
+    function stationPopup(station) {
+      const status = station.status;
+      const bikes = status?.num_bikes_available;
+      const docks = status?.num_docks_available;
+      const updated = status?.last_reported ? new Date(status.last_reported * 1000).toLocaleString() : null;
+      const lines = [`<b>${escapeHtml(station.name || 'Bay Wheels station')}</b>`];
+      if (Number.isFinite(bikes)) { lines.push(`${bikes} bikes available`); }
+      if (Number.isFinite(docks)) { lines.push(`${docks} docks available`); }
+      lines.push(isOperational(station) ? 'Operational' : 'Not currently operational');
+      if (updated) { lines.push(`Updated ${escapeHtml(updated)}`); }
+      return lines.join('<br>');
+    }
+
     function renderStations() {
       stationLayer.clearLayers();
-      for (const station of stations) {
+      if (!showStations.checked) { return; }
+
+      for (const station of activeStations()) {
+        const status = station.status;
+        const bikes = Number(status?.num_bikes_available || 0);
+        const opacity = isOperational(station) ? 0.92 : 0.32;
+        const radius = coverageMode.value === 'bikes' ? Math.min(8, Math.max(4, 3 + Math.sqrt(bikes))) : 4;
+
         L.circleMarker([station.lat, station.lon], {
-          radius: 4,
+          radius,
           weight: 1,
           color: '#2458d3',
           fillColor: '#2458d3',
-          fillOpacity: 0.92
-        }).bindPopup(`<b>${escapeHtml(station.name || 'Bay Wheels station')}</b>`).addTo(stationLayer);
+          fillOpacity: opacity
+        }).bindPopup(stationPopup(station)).addTo(stationLayer);
       }
     }
 
@@ -383,30 +516,96 @@
       coverageLayer.clearLayers();
       const radius = Number(radiusInput.value) || 400;
       radiusLabel.textContent = `${radius}m`;
-      for (const station of stations) {
+      if (!showCoverage.checked) { return; }
+
+      for (const station of activeStations()) {
         L.circle([station.lat, station.lon], {
           radius,
           stroke: false,
           fillColor: '#167c4a',
-          fillOpacity: 0.11,
+          fillOpacity: 0.10,
           interactive: false
         }).addTo(coverageLayer);
       }
     }
 
-    function parseApartments(text) {
-      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((line, index) => {
-        const parts = line.split(',').map(part => part.trim());
-        if (parts.length < 3) { return null; }
-        const lng = Number(parts.pop());
-        const lat = Number(parts.pop());
-        const name = parts.join(', ') || `Apartment ${index + 1}`;
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) { return null; }
-        return { name, lat, lng };
-      }).filter(Boolean);
+    function updateStats() {
+      const currentStations = activeStations();
+      const bikes = currentStations.reduce((sum, station) => sum + Number(station.status?.num_bikes_available || 0), 0);
+      stationCount.textContent = `${currentStations.length}/${stations.length || '—'}`;
+      bikeCount.textContent = stations.length ? String(bikes) : '—';
+      radiusLabel.textContent = `${Number(radiusInput.value) || 400}m`;
     }
 
-    function checkApartments() {
+    function redrawMap() {
+      updateStats();
+      renderStations();
+      renderCoverage();
+      if (apartmentInput.value.trim()) { checkApartments(false); }
+    }
+
+    function parseApartments(text) {
+      return text.split(/\r?\n/).map((line, index) => parseApartmentLine(line, index)).filter(Boolean);
+    }
+
+    function parseApartmentLine(rawLine, index) {
+      const line = rawLine.trim();
+      if (!line) { return null; }
+
+      const csvParts = line.split(',').map(part => part.trim());
+      if (csvParts.length >= 2) {
+        const maybeLng = Number(csvParts[csvParts.length - 1]);
+        const maybeLat = Number(csvParts[csvParts.length - 2]);
+        if (Number.isFinite(maybeLat) && Number.isFinite(maybeLng)) {
+          return {
+            name: csvParts.slice(0, -2).join(', ') || `Apartment ${index + 1}`,
+            lat: maybeLat,
+            lng: maybeLng
+          };
+        }
+      }
+
+      const extracted = extractCoordinates(line);
+      if (!extracted) { return null; }
+
+      const name = line
+        .replace(extracted.matchedText, '')
+        .replace(/https?:\/\/\S+/g, '')
+        .replace(/[,\s]+$/g, '')
+        .trim();
+
+      return {
+        name: name || `Apartment ${index + 1}`,
+        lat: extracted.lat,
+        lng: extracted.lng
+      };
+    }
+
+    function extractCoordinates(value) {
+      let decoded = value;
+      try { decoded = decodeURIComponent(value); } catch (_) {}
+
+      const patterns = [
+        /@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+        /[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+        /[?&]ll=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+        /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/,
+        /(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/
+      ];
+
+      for (const pattern of patterns) {
+        const match = decoded.match(pattern);
+        if (!match) { continue; }
+        const lat = Number(match[1]);
+        const lng = Number(match[2]);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return { lat, lng, matchedText: match[0] };
+        }
+      }
+      return null;
+    }
+
+    function checkApartments(shouldFit = true) {
       apartmentLayer.clearLayers();
       resultsEl.innerHTML = '';
       const radius = Number(radiusInput.value) || 400;
@@ -414,20 +613,22 @@
       apartmentCount.textContent = String(apartments.length);
 
       if (!apartments.length) {
+        lastApartmentResults = [];
         resultsEl.innerHTML = '<div class="result">No valid apartment rows found.</div>';
         return;
       }
 
       const bounds = [];
-      const sorted = apartments.map(apartment => {
+      lastApartmentResults = apartments.map(apartment => {
         const nearest = nearestStation(apartment.lat, apartment.lng);
-        return { ...apartment, nearest, covered: nearest && nearest.distance <= radius };
+        return { ...apartment, nearest, covered: Boolean(nearest && nearest.distance <= radius) };
       }).sort((a, b) => (b.nearest?.distance || 0) - (a.nearest?.distance || 0));
 
-      for (const apartment of sorted) {
+      for (const apartment of lastApartmentResults) {
         const color = apartment.covered ? '#167c4a' : '#b42318';
         const distance = apartment.nearest ? Math.round(apartment.nearest.distance) : null;
-        const popup = `<b>${escapeHtml(apartment.name)}</b><br>${apartment.covered ? 'Within' : 'Outside'} ${radius}m<br>${distance}m to ${escapeHtml(apartment.nearest?.station.name || 'nearest station')}`;
+        const stationName = apartment.nearest?.station.name || 'nearest station';
+        const popup = `<b>${escapeHtml(apartment.name)}</b><br>${apartment.covered ? 'Within' : 'Outside'} ${radius}m<br>${distance ?? '—'}m to ${escapeHtml(stationName)}`;
         L.circleMarker([apartment.lat, apartment.lng], {
           radius: 7,
           weight: 2,
@@ -439,13 +640,54 @@
 
         const result = document.createElement('div');
         result.className = 'result';
-        result.innerHTML = `<b>${escapeHtml(apartment.name)}</b><br>${apartment.covered ? 'Inside' : 'Outside'} radius; ${distance}m to ${escapeHtml(apartment.nearest?.station.name || 'nearest station')}.`;
+        result.innerHTML = `<b>${escapeHtml(apartment.name)}</b><span class="badge ${apartment.covered ? 'covered' : 'miss'}">${apartment.covered ? 'inside' : 'outside'}</span><br>${distance ?? '—'}m to ${escapeHtml(stationName)}.`;
         resultsEl.appendChild(result);
       }
 
-      if (bounds.length) {
+      if (shouldFit && bounds.length) {
         map.fitBounds(L.latLngBounds(bounds).pad(0.2));
       }
+    }
+
+    function downloadResults() {
+      if (!lastApartmentResults.length && apartmentInput.value.trim()) {
+        checkApartments(false);
+      }
+      if (!lastApartmentResults.length) { return; }
+
+      const rows = [
+        ['name', 'lat', 'lng', 'inside_radius', 'distance_m', 'nearest_station', 'nearest_station_bikes', 'nearest_station_docks']
+      ];
+
+      for (const item of lastApartmentResults) {
+        rows.push([
+          item.name,
+          item.lat,
+          item.lng,
+          item.covered ? 'yes' : 'no',
+          item.nearest ? Math.round(item.nearest.distance) : '',
+          item.nearest?.station.name || '',
+          item.nearest?.station.status?.num_bikes_available ?? '',
+          item.nearest?.station.status?.num_docks_available ?? ''
+        ]);
+      }
+
+      const csv = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'bay-wheels-apartment-check.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(value) {
+      const stringValue = String(value);
+      if (/[",\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
     }
 
     function escapeHtml(value) {
@@ -454,47 +696,142 @@
       }[char]));
     }
 
-    async function fetchStations() {
-      let lastError;
-      for (const url of GBFS_URLS) {
-        try {
-          const response = await fetch(url, { cache: 'no-store' });
-          if (!response.ok) { throw new Error(`${response.status} ${response.statusText}`); }
-          const json = await response.json();
-          const rawStations = json.data && Array.isArray(json.data.stations) ? json.data.stations : [];
-          stations = rawStations.filter(isInSf).map(station => ({
-            id: station.station_id,
-            name: station.name,
-            lat: Number(station.lat),
-            lon: Number(station.lon)
-          })).filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lon));
+    async function fetchJson(url) {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) { throw new Error(`${response.status} ${response.statusText}`); }
+      return response.json();
+    }
 
-          if (!stations.length) { throw new Error('No SF stations found in feed.'); }
-          stationCount.textContent = String(stations.length);
-          statusEl.textContent = `Loaded ${stations.length} SF stations from Bay Wheels GBFS.`;
-          renderStations();
-          renderCoverage();
-          return;
+    function feedMapFromDiscovery(json) {
+      const data = json.data || {};
+      const candidates = [];
+
+      if (Array.isArray(data.feeds)) {
+        candidates.push(...data.feeds);
+      }
+
+      for (const value of Object.values(data)) {
+        if (value && Array.isArray(value.feeds)) {
+          candidates.push(...value.feeds);
+        }
+      }
+
+      return candidates.reduce((feeds, feed) => {
+        if (feed?.name && feed?.url) {
+          feeds[feed.name] = feed.url;
+        }
+        return feeds;
+      }, {});
+    }
+
+    async function discoverFeeds() {
+      let lastError;
+      for (const url of GBFS_DISCOVERY_URLS) {
+        try {
+          const json = await fetchJson(url);
+          const feeds = feedMapFromDiscovery(json);
+          if (feeds.station_information) {
+            return { feeds, discoveryUrl: url };
+          }
+          throw new Error('Discovery feed did not include station_information.');
         } catch (error) {
           lastError = error;
         }
       }
-      statusEl.textContent = `Could not load Bay Wheels station data: ${lastError?.message || 'unknown error'}.`;
+      throw lastError || new Error('Could not discover GBFS feeds.');
     }
 
-    document.getElementById('apply-radius').addEventListener('click', () => {
-      renderCoverage();
-      if (apartmentInput.value.trim()) { checkApartments(); }
-    });
+    async function fetchFirstAvailable(urls) {
+      let lastError;
+      for (const url of urls) {
+        try {
+          const json = await fetchJson(url);
+          return { json, url };
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error('No available feed URLs.');
+    }
 
-    document.getElementById('check-apartments').addEventListener('click', checkApartments);
+    function stationStatusById(json) {
+      const rawStatuses = json.data && Array.isArray(json.data.stations) ? json.data.stations : [];
+      return rawStatuses.reduce((byId, status) => {
+        byId[String(status.station_id)] = status;
+        return byId;
+      }, {});
+    }
+
+    async function fetchStations() {
+      try {
+        let feeds;
+        let sourceDescription;
+
+        try {
+          const discovered = await discoverFeeds();
+          feeds = discovered.feeds;
+          sourceDescription = `Discovered GBFS feeds from ${new URL(discovered.discoveryUrl).hostname}.`;
+        } catch (_) {
+          feeds = {};
+          sourceDescription = 'Using fallback GBFS feed URLs.';
+        }
+
+        const stationInfoFeed = feeds.station_information
+          ? await fetchFirstAvailable([feeds.station_information])
+          : await fetchFirstAvailable(FALLBACK_FEEDS.station_information);
+
+        let statuses = {};
+        let statusLoaded = false;
+        const statusUrls = feeds.station_status ? [feeds.station_status] : FALLBACK_FEEDS.station_status;
+        try {
+          const statusFeed = await fetchFirstAvailable(statusUrls);
+          statuses = stationStatusById(statusFeed.json);
+          statusLoaded = true;
+        } catch (_) {}
+
+        const rawStations = stationInfoFeed.json.data && Array.isArray(stationInfoFeed.json.data.stations)
+          ? stationInfoFeed.json.data.stations
+          : [];
+
+        stations = rawStations.filter(isInSf).map(station => ({
+          id: String(station.station_id),
+          name: station.name,
+          lat: Number(station.lat),
+          lon: Number(station.lon),
+          status: statuses[String(station.station_id)] || null
+        })).filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lon));
+
+        if (!stations.length) { throw new Error('No SF stations found in feed.'); }
+
+        statusEl.textContent = `${sourceDescription} Loaded ${stations.length} SF stations${statusLoaded ? ' with live availability.' : '; availability unavailable.'}`;
+        redrawMap();
+      } catch (error) {
+        statusEl.textContent = `Could not load Bay Wheels station data: ${error?.message || 'unknown error'}.`;
+      }
+    }
+
+    document.getElementById('apply-radius').addEventListener('click', redrawMap);
+    coverageMode.addEventListener('change', redrawMap);
+    showCoverage.addEventListener('change', redrawMap);
+    showStations.addEventListener('change', redrawMap);
+    document.getElementById('check-apartments').addEventListener('click', () => checkApartments(true));
+    document.getElementById('download-results').addEventListener('click', downloadResults);
     document.getElementById('clear-apartments').addEventListener('click', () => {
       apartmentInput.value = '';
       apartmentCount.textContent = '0';
+      lastApartmentResults = [];
       apartmentLayer.clearLayers();
       resultsEl.innerHTML = '';
     });
     document.getElementById('fit-sf').addEventListener('click', () => map.fitBounds(SF_BOUNDS));
+
+    map.on('click', event => {
+      const lat = event.latlng.lat.toFixed(6);
+      const lng = event.latlng.lng.toFixed(6);
+      const prefix = apartmentInput.value.trim() ? '\n' : '';
+      apartmentInput.value += `${prefix}Dropped pin,${lat},${lng}`;
+      checkApartments(false);
+    });
 
     fetchStations();
   </script>
