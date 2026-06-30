@@ -9,6 +9,7 @@ on:
     paths:
       - '.github/workflows/update-bikeshare-data.yml'
       - 'bikeshare/scripts/update-stations.mjs'
+      - 'bikeshare/scripts/update-walk-network.mjs'
 
 permissions:
   contents: write
@@ -22,8 +23,9 @@ jobs:
         with:
           node-version: '20'
       - run: node bikeshare/scripts/update-stations.mjs
-      - name: Commit updated station data
+      - run: node bikeshare/scripts/update-walk-network.mjs
+      - name: Commit updated bikeshare data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Update Bay Wheels station data
-          file_pattern: bikeshare/stations.json
+          commit_message: Update Bay Wheels data
+          file_pattern: bikeshare/stations.json bikeshare/walk-network.json
