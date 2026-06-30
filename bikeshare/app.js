@@ -2,10 +2,10 @@ const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
 const SF_MAX_BOUNDS = [[37.660, -122.560], [37.855, -122.320]];
 const WALK_METERS_PER_MINUTE = 80;
 const GRID_STEP_DEG = 0.0045;
+const FIVE_MINUTE_EDGE_METERS = WALK_METERS_PER_MINUTE * 5;
 
 const stationCount = document.getElementById('station-count');
 const bikeCount = document.getElementById('bike-count');
-const radiusInput = document.getElementById('radius');
 const radiusLabel = document.getElementById('radius-label');
 const heatCount = document.getElementById('heat-count');
 const statusEl = document.getElementById('status');
@@ -171,7 +171,7 @@ function renderHeat() {
   resizeHeatCanvas();
   const size = map.getSize();
   heatCtx.clearRect(0, 0, size.x, size.y);
-  radiusLabel.textContent = `${Number(radiusInput.value) || 400}m`;
+  radiusLabel.textContent = `${FIVE_MINUTE_EDGE_METERS}m`;
 
   if (!showHeat.checked) {
     heatCount.textContent = '0';
@@ -193,7 +193,7 @@ function updateStats() {
   const bikes = currentStations.reduce((sum, station) => sum + Number(station.num_bikes_available || 0), 0);
   stationCount.textContent = stations.length ? `${currentStations.length}/${stations.length}` : '—';
   bikeCount.textContent = stations.length ? String(bikes) : '—';
-  radiusLabel.textContent = `${Number(radiusInput.value) || 400}m`;
+  radiusLabel.textContent = `${FIVE_MINUTE_EDGE_METERS}m`;
 }
 
 function rebuildHeatAndRedraw() {
@@ -338,7 +338,6 @@ function escapeHtml(value) {
   }[char]));
 }
 
-document.getElementById('apply-radius').addEventListener('click', rebuildHeatAndRedraw);
 coverageMode.addEventListener('change', rebuildHeatAndRedraw);
 showHeat.addEventListener('change', renderHeat);
 showStations.addEventListener('change', renderStations);
