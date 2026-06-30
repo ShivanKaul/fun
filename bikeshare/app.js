@@ -1,4 +1,5 @@
 const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
+const SF_MAX_BOUNDS = [[37.660, -122.560], [37.855, -122.320]];
 const stationCount = document.getElementById('station-count');
 const bikeCount = document.getElementById('bike-count');
 const radiusInput = document.getElementById('radius');
@@ -15,10 +16,18 @@ if (!window.L) {
   throw new Error('Leaflet failed to load.');
 }
 
-const map = L.map('map', { preferCanvas: true, zoomControl: false }).fitBounds(SF_BOUNDS);
+const map = L.map('map', {
+  preferCanvas: true,
+  zoomControl: false,
+  maxBounds: SF_MAX_BOUNDS,
+  maxBoundsViscosity: 0.85,
+  minZoom: 11
+}).fitBounds(SF_BOUNDS);
+
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
+  bounds: SF_MAX_BOUNDS,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
@@ -44,6 +53,15 @@ function activeStations() {
   return stations;
 }
 
+function stationIsVisible(station, paddedBounds = map.getBounds().pad(0.15)) {
+  return paddedBounds.contains([station.lat, station.lon]);
+}
+
+function visibleStations() {
+  const paddedBounds = map.getBounds().pad(0.15);
+  return activeStations().filter(station => stationIsVisible(station, paddedBounds));
+}
+
 function stationPopup(station) {
   const bikes = station.num_bikes_available;
   const docks = station.num_docks_available;
@@ -60,7 +78,7 @@ function renderStations() {
   stationLayer.clearLayers();
   if (!showStations.checked) { return; }
 
-  for (const station of activeStations()) {
+  for (const station of visibleStations()) {
     const bikes = Number(station.num_bikes_available || 0);
     const opacity = isOperational(station) ? 0.95 : 0.35;
     const markerRadius = coverageMode.value === 'bikes' ? Math.min(8, Math.max(4, 3 + Math.sqrt(bikes))) : 4.5;
@@ -103,7 +121,7 @@ function renderCoverage() {
   coverageCtx.strokeStyle = 'rgba(7, 93, 52, 0.42)';
   coverageCtx.lineWidth = 1;
 
-  for (const station of activeStations()) {
+  for (const station of visibleStations()) {
     const point = map.latLngToContainerPoint([station.lat, station.lon]);
     const pixelRadius = radiusInPixels(station.lat, station.lon, radius);
     coverageCtx.beginPath();
@@ -127,9 +145,9 @@ function redraw() {
   renderCoverage();
 }
 
-function scheduleCoverageRedraw() {
+function scheduleRedraw() {
   if (redrawTimer) { cancelAnimationFrame(redrawTimer); }
-  redrawTimer = requestAnimationFrame(renderCoverage);
+  redrawTimer = requestAnimationFrame(redraw);
 }
 
 async function loadStations() {
@@ -160,7 +178,7 @@ coverageMode.addEventListener('change', redraw);
 showCoverage.addEventListener('change', redraw);
 showStations.addEventListener('change', redraw);
 document.getElementById('fit-sf').addEventListener('click', () => map.fitBounds(SF_BOUNDS));
-map.on('move zoom resize', scheduleCoverageRedraw);
-window.addEventListener('resize', scheduleCoverageRedraw);
+map.on('moveend zoomend resize', scheduleRedraw);
+window.addEventListener('resize', scheduleRedraw);
 
 loadStations();
