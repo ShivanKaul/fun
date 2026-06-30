@@ -11,7 +11,7 @@
   <header>
     <div>
       <h1>SF Bay Wheels coverage</h1>
-      <p class="lede">A static heat map of approximate walking time to Bay Wheels docks in San Francisco. Station data is prebuilt into this site, so the map does not depend on live GBFS requests from your browser.</p>
+      <p class="lede">A static heat map of approximate walking time to Bay Wheels docks in San Francisco. Station and pedestrian-network data are prebuilt into this site, so the map does not need a routing backend.</p>
     </div>
     <div class="stats" aria-label="Map statistics">
       <div class="stat"><b id="station-count">—</b><span>stations</span></div>
@@ -66,7 +66,7 @@
           <div class="key"><span class="swatch bad"></span> Over 12 min</div>
           <div class="key"><span class="swatch station"></span> Bay Wheels station</div>
         </div>
-        <p class="note">Scale assumes 80m/minute, so 400m is about 5 minutes. This is straight-line distance, not a street-network isochrone.</p>
+        <p class="note">Walking time is computed over a prebuilt OSM pedestrian network. If that file is unavailable, the page falls back to straight-line distance and says so.</p>
       </section>
     </aside>
   </main>
