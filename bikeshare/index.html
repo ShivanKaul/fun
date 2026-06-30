@@ -28,26 +28,17 @@
     <aside class="panel" aria-label="Map controls">
       <section class="panel-section">
         <h2>Map</h2>
-        <div class="row">
-          <div>
-            <label for="radius">5-minute approximation</label>
-            <input id="radius" type="number" min="100" max="1200" step="25" value="400" />
-          </div>
-          <div>
-            <label for="coverage-mode">Stations</label>
-            <select id="coverage-mode">
-              <option value="all">All stations</option>
-              <option value="operational">Operational</option>
-              <option value="bikes">With bikes now</option>
-            </select>
-          </div>
-        </div>
+        <label for="coverage-mode">Stations</label>
+        <select id="coverage-mode">
+          <option value="all">All stations</option>
+          <option value="operational">Operational</option>
+          <option value="bikes">With bikes now</option>
+        </select>
         <div class="toggles">
           <label class="toggle"><input id="show-heat" type="checkbox" checked /> Show heat map</label>
           <label class="toggle"><input id="show-stations" type="checkbox" checked /> Show station dots</label>
         </div>
         <div class="controls">
-          <button id="apply-radius">Update</button>
           <button class="secondary" id="fit-sf">Fit SF</button>
         </div>
         <p class="status" id="status">Loading local station data…</p>
@@ -75,7 +66,7 @@
           <div class="key"><span class="swatch bad"></span> Over 12 min</div>
           <div class="key"><span class="swatch station"></span> Bay Wheels station</div>
         </div>
-        <p class="note">This is a straight-line approximation, not a street-network isochrone. Use it as a fast screen, not a routing guarantee.</p>
+        <p class="note">Scale assumes 80m/minute, so 400m is about 5 minutes. This is straight-line distance, not a street-network isochrone.</p>
       </section>
     </aside>
   </main>
