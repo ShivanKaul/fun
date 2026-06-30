@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SF Bay Wheels Coverage</title>
   <link rel="preconnect" href="https://unpkg.com" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQFzsViWJxS6vl2A2uI65wJvRtZaJk=" crossorigin="" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --bg: #f8f5ef;
@@ -385,22 +385,30 @@ https://maps.google.com/?q=37.7767,-122.4241"></textarea>
     </aside>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    if (!window.L) {
+      document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>');
+    }
+  </script>
   <script>
     const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
     const GBFS_DISCOVERY_URLS = [
-      'https://gbfs.lyft.com/gbfs/2.3/bay/en/gbfs.json',
       'https://gbfs.baywheels.com/gbfs/2.3/gbfs.json',
+      'https://gbfs.lyft.com/gbfs/2.3/bay/gbfs.json',
+      'https://gbfs.lyft.com/gbfs/2.3/bay/en/gbfs.json',
       'https://gbfs.lyft.com/gbfs/2.2/bay/en/gbfs.json',
       'https://gbfs.lyft.com/gbfs/1.1/bay/en/gbfs.json'
     ];
     const FALLBACK_FEEDS = {
       station_information: [
+        'https://gbfs.baywheels.com/gbfs/2.3/bay/en/station_information.json',
         'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_information.json',
         'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_information.json',
         'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_information.json'
       ],
       station_status: [
+        'https://gbfs.baywheels.com/gbfs/2.3/bay/en/station_status.json',
         'https://gbfs.lyft.com/gbfs/2.3/bay/en/station_status.json',
         'https://gbfs.lyft.com/gbfs/2.2/bay/en/station_status.json',
         'https://gbfs.lyft.com/gbfs/1.1/bay/en/station_status.json'
@@ -418,6 +426,11 @@ https://maps.google.com/?q=37.7767,-122.4241"></textarea>
     const coverageMode = document.getElementById('coverage-mode');
     const showCoverage = document.getElementById('show-coverage');
     const showStations = document.getElementById('show-stations');
+
+    if (!window.L) {
+      document.getElementById('map').innerHTML = '<div style="height:100%;display:grid;place-items:center;padding:2rem;text-align:center;color:#5f6c7b;">Map library failed to load. Refresh the page or check whether a content blocker is blocking Leaflet.</div>';
+      throw new Error('Leaflet failed to load.');
+    }
 
     const map = L.map('map', { preferCanvas: true }).fitBounds(SF_BOUNDS);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -741,9 +754,13 @@ https://maps.google.com/?q=37.7767,-122.4241"></textarea>
       throw lastError || new Error('Could not discover GBFS feeds.');
     }
 
+    function uniqueUrls(urls) {
+      return [...new Set(urls.filter(Boolean))];
+    }
+
     async function fetchFirstAvailable(urls) {
       let lastError;
-      for (const url of urls) {
+      for (const url of uniqueUrls(urls)) {
         try {
           const json = await fetchJson(url);
           return { json, url };
@@ -776,13 +793,16 @@ https://maps.google.com/?q=37.7767,-122.4241"></textarea>
           sourceDescription = 'Using fallback GBFS feed URLs.';
         }
 
-        const stationInfoFeed = feeds.station_information
-          ? await fetchFirstAvailable([feeds.station_information])
-          : await fetchFirstAvailable(FALLBACK_FEEDS.station_information);
+        const stationInfoUrls = feeds.station_information
+          ? [feeds.station_information, ...FALLBACK_FEEDS.station_information]
+          : FALLBACK_FEEDS.station_information;
+        const stationInfoFeed = await fetchFirstAvailable(uniqueUrls(stationInfoUrls));
 
         let statuses = {};
         let statusLoaded = false;
-        const statusUrls = feeds.station_status ? [feeds.station_status] : FALLBACK_FEEDS.station_status;
+        const statusUrls = feeds.station_status
+          ? uniqueUrls([feeds.station_status, ...FALLBACK_FEEDS.station_status])
+          : FALLBACK_FEEDS.station_status;
         try {
           const statusFeed = await fetchFirstAvailable(statusUrls);
           statuses = stationStatusById(statusFeed.json);
@@ -806,7 +826,7 @@ https://maps.google.com/?q=37.7767,-122.4241"></textarea>
         statusEl.textContent = `${sourceDescription} Loaded ${stations.length} SF stations${statusLoaded ? ' with live availability.' : '; availability unavailable.'}`;
         redrawMap();
       } catch (error) {
-        statusEl.textContent = `Could not load Bay Wheels station data: ${error?.message || 'unknown error'}.`;
+        statusEl.textContent = `Could not load Bay Wheels station data: ${error?.message || 'unknown error'}. This is usually a GBFS/CORS/content-blocking issue, not a map rendering issue.`;
       }
     }
 
