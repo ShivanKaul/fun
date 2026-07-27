@@ -23,9 +23,8 @@ jobs:
         with:
           node-version: '20'
       - run: node bikeshare/scripts/update-stations.mjs
-      - run: node bikeshare/scripts/update-walk-network.mjs
       - name: Commit updated bikeshare data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update Bay Wheels data
-          file_pattern: bikeshare/stations.json bikeshare/walk-network.json
+          file_pattern: bikeshare/stations.json
