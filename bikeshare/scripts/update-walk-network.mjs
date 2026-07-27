@@ -3,8 +3,11 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const SF_BOUNDS = [[37.690, -122.530], [37.835, -122.350]];
 const OVERPASS_URLS = [
   'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter'
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
 ];
+const MAX_RETRIES = 4;
+const RETRY_BASE_DELAY_MS = 5000;
 const WALK_SPEED_METERS_PER_SECOND = 80 / 60;
 const STEP_SPEED_METERS_PER_SECOND = 55 / 60;
 const WALKABLE_HIGHWAYS = new Set([
@@ -30,18 +33,34 @@ out body;
 async function fetchOverpass() {
   let lastError;
   for (const url of OVERPASS_URLS) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-        body: new URLSearchParams({ data: overpassQuery() })
-      });
-      if (!response.ok) {
-        throw new Error(`${url}: ${response.status} ${response.statusText}`);
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt += 1) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          body: new URLSearchParams({ data: overpassQuery() })
+        });
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('retry-after');
+          const delay = retryAfter
+            ? Number(retryAfter) * 1000
+            : RETRY_BASE_DELAY_MS * 2 ** attempt;
+          console.warn(`${url}: 429 rate-limited, retrying in ${Math.round(delay / 1000)}s (attempt ${attempt + 1}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        if (!response.ok) {
+          throw new Error(`${url}: ${response.status} ${response.statusText}`);
+        }
+        return { json: await response.json(), url };
+      } catch (error) {
+        lastError = error;
+        if (attempt < MAX_RETRIES - 1) {
+          const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
+          console.warn(`${url}: request failed (${error.message}), retrying in ${Math.round(delay / 1000)}s (attempt ${attempt + 1}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-      return { json: await response.json(), url };
-    } catch (error) {
-      lastError = error;
     }
   }
   throw lastError || new Error('No Overpass endpoint succeeded.');
