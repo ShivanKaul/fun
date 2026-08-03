@@ -95,6 +95,13 @@
       isolation: isolate;
     }
 
+    .book-card.is-selected {
+      border-color: color-mix(in srgb, var(--accent) 72%, transparent);
+      box-shadow:
+        0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
+        0 28px 90px rgba(58, 42, 28, 0.22);
+    }
+
     .book-card::before {
       content: "";
       position: absolute;
@@ -102,6 +109,25 @@
       height: 7px;
       background: var(--accent);
       z-index: 2;
+    }
+
+    .selected-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 11px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.22);
     }
 
     .cover-wrap {
@@ -233,22 +259,37 @@
       border-top: 1px solid var(--line);
     }
 
-    .library {
+    .library,
+    .my-review {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       text-decoration: none;
-      background: var(--accent);
-      color: #fff;
       font-weight: 800;
       font-size: 0.86rem;
       padding: 11px 14px;
       border-radius: 12px;
-      transition: filter 0.15s ease;
+      transition: filter 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .library {
+      background: var(--accent);
+      color: #fff;
     }
 
     .library:hover { filter: brightness(1.08); }
+
+    .my-review {
+      border: 1px solid color-mix(in srgb, var(--accent) 46%, transparent);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .my-review:hover {
+      border-color: var(--accent);
+      color: color-mix(in srgb, var(--accent) 58%, black);
+    }
 
     .section-label {
       font-size: 0.7rem;
@@ -338,6 +379,15 @@
       return out;
     }
 
+    function isSelected(book) {
+      return ['true', 'yes', 'selected'].indexOf(String(book.selected || '').toLowerCase()) !== -1;
+    }
+
+    function splitLabelUrl(value) {
+      var parts = String(value || '').split('|');
+      return { label: parts[0].trim(), url: (parts[1] || '').trim() };
+    }
+
     function parseBooks(text) {
       var page = {};
       var books = [];
@@ -369,8 +419,7 @@
         if (key === 'tags') {
           current.tags = value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
         } else if (key === 'link') {
-          var parts = value.split('|');
-          current.links.push({ label: parts[0].trim(), url: (parts[1] || '').trim() });
+          current.links.push(splitLabelUrl(value));
         } else if (key === 'quote') {
           if (value) {
             var q = value.split('|');
@@ -385,6 +434,7 @@
     }
 
     function renderCard(book) {
+      var selected = isSelected(book);
       var tags = book.tags.map(function (t) {
         return '<span class="tag">' + esc(t) + '</span>';
       }).join('');
@@ -404,13 +454,21 @@
           '</blockquote>';
       }
 
+      var myReview = '';
+      if (book['my review']) {
+        var review = splitLabelUrl(book['my review']);
+        if (review.url) {
+          myReview = '<a class="my-review" href="' + esc(review.url) + '" target="_blank" rel="noopener">My review: ' + esc(review.label) + '</a>';
+        }
+      }
+
       var library = book.library
         ? '<a class="library" href="' + esc(book.library) + '" target="_blank" rel="noopener">Find it at SF Public Library</a>'
         : '';
       var reviews = links
         ? '<div><div class="section-label">Reviews</div><div class="review-links">' + links + '</div></div>'
         : '';
-      var foot = (library || reviews) ? '<div class="card-foot">' + library + reviews + '</div>' : '';
+      var foot = (myReview || library || reviews) ? '<div class="card-foot">' + myReview + library + reviews + '</div>' : '';
 
       var cover = '<img class="cover" alt="' + esc(book.title) + ' book cover" src="' + esc(book.cover || '') + '" />';
       if (book.wikipedia) {
@@ -418,7 +476,8 @@
       }
 
       return (
-        '<article class="book-card" style="--accent: ' + esc(book.accent || '#6f6258') + '">' +
+        '<article class="book-card' + (selected ? ' is-selected' : '') + '" style="--accent: ' + esc(book.accent || '#6f6258') + '">' +
+          (selected ? '<div class="selected-badge">Selected</div>' : '') +
           '<div class="cover-wrap">' + cover + '</div>' +
           '<div class="content">' +
             '<div class="title-row">' +
