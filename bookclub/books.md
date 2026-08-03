@@ -1,8 +1,8 @@
 # Page settings (edit these, then each "## " below is one book card)
 #
 # Per-book fields you can edit:
-#   author (supports [name](url) links), accent (hex color), cover (image URL), wikipedia (book URL), tags (comma-separated),
-#   sell, quote (format: text | Source),
+#   author (supports [name](url) links), accent (hex color), cover (image URL), wikipedia (book URL), selected, tags (comma-separated),
+#   sell, quote (format: text | Source), my review (format: Label | URL),
 #   why pick, why not pick, library (SF Public Library URL),
 #   link (one review per line, format: Label | URL)
 
@@ -41,9 +41,11 @@ intro: This is a selection of books that have been on my list for a long time + 
 - accent: #7a5a22
 - cover: https://www.hachettebookgroup.com/wp-content/uploads/2024/08/9781538732182.jpg
 - wikipedia: https://en.wikipedia.org/wiki/Parable_of_the_Sower_(novel)
+- selected: true
 - tags: dystopian, climate fiction, political, sci-fi, religion, inequality
 - why pick: This has been on my list forever. I don't know much about it except that there's a dystopian society involved and that I've loved everything I've read by Octavia Butler.
 - why not pick: It sounds bleak and violent.
+- my review: Depressing but engaging read | reviews/parable-of-the-sower/
 - library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
 - link: NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
 - link: WIRED | https://www.wired.com/1995/10/when-the-lights-go-out/
