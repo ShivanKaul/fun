@@ -1,5 +1,7 @@
 # Book Club Picks
 
+https://shivankaul.com/fun/bookclub/
+
 A static one-page site for browsing book-club nominations. All card content
 lives in `books.md`, so you can edit the page without touching any HTML.
 
