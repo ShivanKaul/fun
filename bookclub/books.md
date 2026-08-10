@@ -45,7 +45,7 @@ intro: This is a selection of books that have been on my list for a long time + 
 - tags: dystopian, climate fiction, political, sci-fi, religion, inequality
 - why pick: This has been on my list forever. I don't know much about it except that there's a dystopian society involved and that I've loved everything I've read by Octavia Butler.
 - why not pick: It sounds bleak and violent.
-- my review: Parable of the Sower | reviews/parable-of-the-sower/
+- my review: Parable of the Sower | https://shivankaul.com/blog/parable-of-the-sower
 - library: https://sfpl.bibliocommons.com/v2/search?query=Parable%20of%20the%20Sower%20&searchType=title
 - link: NYT review | https://www.nytimes.com/1994/01/02/books/science-fiction.html
 - link: WIRED | https://www.wired.com/1995/10/when-the-lights-go-out/
