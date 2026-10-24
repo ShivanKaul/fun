@@ -26,12 +26,8 @@
     button { width: 100%; margin-top: 18px; min-height: 48px; padding: 12px 20px; border: 0; border-radius: 9px; background: #243b53; color: white; font: inherit; font-weight: 650; cursor: pointer; }
     button:hover { background: #142c44; }
     button:disabled { cursor: wait; opacity: .65; }
-    button:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid #366fbc; outline-offset: 4px; }
+    button:focus-visible { outline: 3px solid #366fbc; outline-offset: 4px; }
     .note { font-size: .9rem; color: #536170; margin-top: 22px; }
-    details { margin-top: 28px; font-size: .9rem; color: #536170; }
-    summary { cursor: pointer; }
-    code { overflow-wrap: anywhere; font-size: .85rem; }
-    a { color: #255c9b; text-underline-offset: 3px; }
     .probe { position: absolute; width: 1px; height: 1px; left: -10px; }
     @media (max-width: 480px) { body { padding-top: 24px; } main { margin-top: 2vh; } .result { padding: 22px; } }
   </style>
@@ -46,13 +42,7 @@
     </section>
     <button id="run" type="button">Run test</button>
     <noscript><p>JavaScript is required to run this test.</p></noscript>
-    <p class="note">Uses PrivacyTests.org's image-load scoring. A network or server error can also produce a PASS, so a pass alone does not prove browser blocking.</p>
-    <details>
-      <summary>What this tests</summary>
-      <p>Requests <code>https://pixel.quantserve.com/pixel</code> as an image with a fresh <code>sessionId</code> query parameter. An image error is a PASS; a loaded image is a FAIL. Each attempt has a 15-second timeout, with up to three attempts. Timeouts and a reported offline connection are INCONCLUSIVE.</p>
-      <p>This tests content blocking, not cookie isolation or deletion. If allowed, the request reaches Quantcast. Results stay on this page.</p>
-      <p><a href="https://github.com/privacytests/privacytests/blob/master/static/tracking_content.html">PrivacyTests implementation</a> · <a href="https://github.com/ShivanKaul/fun/blob/main/quantcast/index.html">This page's source</a></p>
-    </details>
+    <p class="note">Uses PrivacyTests.org's image-load scoring.</p>
   </main>
   <script>
     const result = document.getElementById('result');
